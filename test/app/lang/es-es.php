@@ -1,0 +1,41 @@
+<?php
+// Español
+return [
+    /****** Notificaciones ********/
+    'welcome' => 'Bienvenido a ThinkPHP',
+    'success' => 'Éxito',
+    'error' => 'Error',
+    'no_auth' => 'Sin permisos',
+    'login_null' => 'El usuario no existe o ha sido desactivado',
+    'login_success' => 'Inicio de sesión exitoso',
+    'login_error' => 'Usuario o contraseña incorrectos',
+    'login_out' => 'Sesión expirada, por favor inicie sesión',
+    'password_error' => 'Contraseña incorrecta',
+    'params_error' => 'Error de parámetros',
+    'time_error' => 'El período actual ha finalizado',
+    'non_existent' => 'Los datos no existen',
+    'user_invitation_error' => 'Código de invitación inválido',
+    'user_impose' => 'Tienes restricción para realizar pedidos',
+    'money_error' => 'Saldo insuficiente',
+    'order_success' => 'Pedido realizado con éxito',
+    'order_impose' => 'Restricción de pedidos',
+    'order_seal' => 'Período actual cerrado para pedidos',
+    'withdraw_min' => 'El monto mínimo de retiro es %s',
+    'withdraw_num' => 'Límite diario de retiros: %s veces',
+    'withdraw_limit' => 'Límite: %s. Soporte',
+    'api_limit_error' => 'Demasiadas solicitudes. Por favor, intente más tarde.',
+
+    /****** Traducción de campos ********/
+    'username' => 'Cuenta',
+    'password' => 'Contraseña',
+    'orpassword' => 'Contraseña original',
+    'repassword' => 'Confirmar contraseña',
+    'name' => 'Nombre',
+    'a_name' => 'Nombre abreviado',
+    'period_time' => 'Duración del período',
+    'seal_time' => 'Hora de cierre de pedidos',
+    'cardno' => 'Número de tarjeta bancaria',
+    'code' => 'Especificación del producto',
+    'money' => 'Monto',
+    'card_id' => 'Número de tarjeta',
+];

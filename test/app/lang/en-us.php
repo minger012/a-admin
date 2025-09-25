@@ -1,0 +1,43 @@
+<?php
+// English
+return [
+    /****** Notifications ********/
+    'welcome' => 'Welcome to ThinkPHP',
+    'success' => 'Success',
+    'error' => 'Failed',
+    'no_auth' => 'No permission',
+    'login_null' => 'User does not exist or has been disabled',
+    'login_success' => 'Login successful',
+    'login_error' => 'Incorrect username or password',
+    'login_out' => 'Login expired, please login first',
+    'password_error' => 'Incorrect password',
+    'params_error' => 'Parameter error',
+    'time_error' => 'Current period has ended',
+    'non_existent' => 'Data does not exist',
+    'user_invitation_error' => 'Invalid invitation code',
+    'user_impose' => 'Your order placement is restricted',
+    'money_error' => 'Insufficient balance',
+    'order_success' => 'Order placed successfully',
+    'order_impose' => 'Order restriction',
+    'order_seal' => 'Current period is closed for orders',
+    'withdraw_min' => 'Minimum withdrawal amount is %s',
+    'withdraw_num' => 'Daily withdrawal limit is %s times',
+    'withdraw_limit' => 'Bet limit: %s. Contact us',
+    'api_limit_error' => 'Too many requests. Please try again later.',
+    'withdraw_impose' => 'Withdrawal restricted. Please contact support.',
+    'recharge_impose' => 'Deposits are restricted on this account.',
+
+    /****** Field Translations ********/
+    'username' => 'Account',
+    'password' => 'Password',
+    'orpassword' => 'Original password',
+    'repassword' => 'Confirm password',
+    'name' => 'Name',
+    'a_name' => 'Abbreviated name',
+    'period_time' => 'Period duration',
+    'seal_time' => 'Order closing time',
+    'cardno' => 'Bank card number',
+    'code' => 'Product specification',
+    'money' => 'Amount',
+    'card_id' => 'Card number',
+];
