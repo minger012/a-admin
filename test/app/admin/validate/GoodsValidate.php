@@ -22,10 +22,15 @@ class GoodsValidate extends Validate
 
     protected $rule = [
         'name' => 'require|max:100',
-        'a_name' => 'require|max:10',
-        'intro' => 'require|max:200',
-        'period_time' => 'require|integer|gt:0',
-        'seal_time' => 'require|integer|gt:0',
-        'multiple' => 'require|float|gt:0',
+        'logo' => 'require|max:100',
+        'image' => 'require|max:100',
+        'company' => 'require|max:100',
+        'type_name' => 'require|max:100',
+        'intro' => 'require',
+        'sort' => 'integer|gt:0',
+        'category' => 'integer|gt:0',
+        'is_home' => 'integer|in:0,1',
+        'is_hot' => 'integer|in:0,1',
+        'state' => 'integer|in:0,1,2,3',
     ];
 }

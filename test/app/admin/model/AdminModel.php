@@ -55,7 +55,6 @@ class AdminModel extends Model
                 'username' => $username,
                 'token' => $token,
                 'auth_id' => $admin['auth_id'],
-                'type' => $admin['type'],
                 'pid' => $admin['pid'],
                 'auth' => !empty($string) ? explode(',', $string) : [],
             ];
