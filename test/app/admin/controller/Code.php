@@ -17,11 +17,24 @@ class Code extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (!empty($params['name'])) {
-            $where[] = ['name', '=', $params['name']];
+        if (isset($params['state'])) {
+            $where[] = ['state', '=', $params['state']];
+        }
+        if (isset($params['sTime'])) {
+            $where[] = ['create_time', '>=', $params['sTime']];
+        }
+        if (isset($params['eTime'])) {
+            $where[] = ['create_time', '<=', $params['eTime']];
         }
         try {
+            if (isset($params['name'])) {
+                $admin_id = $res = Db::name('admin')->where(['username' => $params['name']])->value('id');
+                if (!empty($admin_id)) {
+                    $where[] = ['admin_id', '=', $params['admin_id']];
+                }
+            }
             $paginator = Db::table('code')
+                ->where($where)
                 ->order('id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数

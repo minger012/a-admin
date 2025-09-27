@@ -16,8 +16,16 @@ class Coupon extends Base
         if (!$validate->check($params, $validate->page_rule)) {
             return apiError($validate->getError());
         }
+        $where = [];
+        if (isset($params['sTime'])) {
+            $where[] = ['create_time', '>=', $params['sTime']];
+        }
+        if (isset($params['eTime'])) {
+            $where[] = ['create_time', '<=', $params['eTime']];
+        }
         try {
             $paginator = Db::table('coupon')
+                ->where($where)
                 ->order('id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
