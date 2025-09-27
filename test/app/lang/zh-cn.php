@@ -38,7 +38,7 @@ return [
     'period_time' => '每期时间',
     'seal_time' => '封单时间',
     'cardno' => '银行账户',
-    'code' => '商品规格',
+    'code' => '授权码',
     'money' => '金额',
     'card_id' => '卡号',
 ];

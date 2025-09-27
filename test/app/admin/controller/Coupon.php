@@ -2,15 +2,12 @@
 
 namespace app\admin\controller;
 
-use app\admin\validate\PlanValidate;
+use app\admin\validate\CouponValidate;
 use app\common\validate\CommonValidate;
 use think\facade\Db;
 
-class Plan extends Base
+class Coupon extends Base
 {
-    // json字段
-    protected $jsonField = ['content', 'orienteering', 'rule'];
-
     public function list()
     {
         $input = request()->getContent();
@@ -20,19 +17,13 @@ class Plan extends Base
             return apiError($validate->getError());
         }
         try {
-            $paginator = Db::table('plan')
+            $paginator = Db::table('coupon')
                 ->order('id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
                     'page' => $params['page'] ?? 1,     // 当前页码
                 ]);
             $list = $paginator->items();
-            // 字段转化
-            foreach ($list as $key => $value) {
-                foreach ($this->jsonField as $field) {
-                    $list[$key][$field] = !empty($value[$field]) ? json_decode($value[$field], true) : [];
-                }
-            }
             $res = [
                 'list' => $list,       // 当前页数据
                 'total' => $paginator->total(),       // 总记录数
@@ -50,16 +41,12 @@ class Plan extends Base
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
-        $validate = new PlanValidate();
+        $validate = new CouponValidate();
         if (!$validate->check($params)) {
             return apiError($validate->getError());
         }
-        foreach ($this->jsonField as $field) {
-            $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
-        }
-        $params['update_time'] = time();
         $params['create_time'] = time();
-        Db::name('plan')->insert($params);
+        Db::name('coupon')->insert($params);
         return apiSuccess();
     }
 
@@ -67,20 +54,16 @@ class Plan extends Base
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
-        $validate = new PlanValidate();
+        $validate = new CouponValidate();
         if (!$validate->append('id', 'require|number')->check($params)) {
             return apiError($validate->getError());
         }
         try {
-            $res = Db::name('plan')->where(['id' => $params['id']])->find();
+            $res = Db::name('coupon')->where(['id' => $params['id']])->find();
             if (!$res) {
                 return apiError('non_existent');
             }
-            foreach ($this->jsonField as $field) {
-                $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
-            }
-            $params['update_time'] = time();
-            Db::name('plan')
+            Db::name('coupon')
                 ->where(['id' => $params['id']])
                 ->update($params);
             return apiSuccess();
@@ -97,7 +80,7 @@ class Plan extends Base
             return apiError('params_error');
         }
         try {
-            Db::name('plan')->where(['id' => $params['id']])->delete();
+            Db::name('coupon')->where(['id' => $params['id']])->delete();
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e);
