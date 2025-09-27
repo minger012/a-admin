@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '6139c0836fabb74345d8d6196e8ffb8105efa1c5',
+        'reference' => 'd07d5cfc02071f582f1959e42abcbdefa15c21a0',
         'name' => 'topthink/think',
         'dev' => true,
     ),
@@ -115,7 +115,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '6139c0836fabb74345d8d6196e8ffb8105efa1c5',
+            'reference' => 'd07d5cfc02071f582f1959e42abcbdefa15c21a0',
             'dev_requirement' => false,
         ),
         'topthink/think-helper' => array(

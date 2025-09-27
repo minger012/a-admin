@@ -32,5 +32,7 @@ class GoodsValidate extends Validate
         'is_home' => 'integer|in:0,1',
         'is_hot' => 'integer|in:0,1',
         'state' => 'integer|in:0,1,2,3',
+        'app_info.*.title' => 'require|max:100',
+        'app_info.*.content' => 'require',
     ];
 }

@@ -2,14 +2,14 @@
 
 namespace app\admin\controller;
 
-use app\admin\validate\GoodsValidate;
+use app\admin\validate\PlanValidate;
 use app\common\validate\CommonValidate;
 use think\facade\Db;
 
-class Goods extends Base
+class Plan extends Base
 {
     // json字段
-    protected $jsonField = ['app_info'];
+    protected $jsonField = ['content', 'orienteering', 'rule'];
 
     public function list()
     {
@@ -20,7 +20,7 @@ class Goods extends Base
             return apiError($validate->getError());
         }
         try {
-            $paginator = Db::table('goods')
+            $paginator = Db::table('plan')
                 ->order('id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
@@ -50,7 +50,7 @@ class Goods extends Base
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
-        $validate = new GoodsValidate();
+        $validate = new PlanValidate();
         if (!$validate->check($params)) {
             return apiError($validate->getError());
         }
@@ -58,7 +58,7 @@ class Goods extends Base
             $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
         }
         $params['create_time'] = time();
-        Db::name('goods')->insert($params);
+        Db::name('plan')->insert($params);
         return apiSuccess();
     }
 
@@ -66,19 +66,20 @@ class Goods extends Base
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
-        $validate = new GoodsValidate();
+        $validate = new PlanValidate();
         if (!$validate->append('id', 'require|number')->check($params)) {
             return apiError($validate->getError());
         }
         try {
-            $res = Db::name('goods')->where(['id' => $params['id']])->find();
+            $res = Db::name('plan')->where(['id' => $params['id']])->find();
             if (!$res) {
                 return apiError('non_existent');
             }
             foreach ($this->jsonField as $field) {
                 $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
             }
-            Db::name('goods')
+            $params['update_time'] = time();
+            Db::name('plan')
                 ->where(['id' => $params['id']])
                 ->update($params);
             return apiSuccess();
@@ -95,7 +96,7 @@ class Goods extends Base
             return apiError('params_error');
         }
         try {
-            Db::name('goods')->where(['id' => $params['id']])->delete();
+            Db::name('plan')->where(['id' => $params['id']])->delete();
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e);
