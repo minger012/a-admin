@@ -47,8 +47,4 @@ class CommonValidate extends Validate
     public $config_id = [
         'id' => 'in:1,2,3,9',
     ];
-    public $withdraw_limit = [
-        'id' => 'integer|gt:0',
-        'num' => 'integer',
-    ];
 }

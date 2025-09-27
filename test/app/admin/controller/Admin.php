@@ -18,9 +18,6 @@ class Admin extends Base
         }
         try {
             $where = [];
-            if (!$this->isSuperAdmin()) {
-                $where[] = ['a.id', '=', $this->adminInfo['id']];
-            }
             $paginator = Db::table('admin')
                 ->alias('a')
                 ->join('admin_auth b', 'a.auth_id=b.id')
@@ -59,9 +56,6 @@ class Admin extends Base
         $validate = new AdminValidate();
         if (!$validate->check($params)) {
             return apiError($validate->getError());
-        }
-        if (!$this->isSuperAdmin()) {
-            return apiError('no_auth');
         }
         try {
             if (!empty($params['pusername'])) {
