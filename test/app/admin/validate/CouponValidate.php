@@ -25,10 +25,12 @@ class CouponValidate extends Validate
         'type' => 'require|in:1,2,3,4,5',
         'is_new' => 'require|in:0,1',
         'state' => 'require|in:0,1',
+        'expir_type' => 'require|in:1,2',
+        'expir_day' => 'integer|gt:0',
         'discount' => 'require|gt:0',
         'min' => 'egt:0',
         'max' => 'egt:0',
-        'start_time' => 'require|egt:0',
-        'end_time' => 'require|egt:0',
+        'start_time' => 'integer|egt:0',
+        'end_time' => 'integer|egt:0',
     ];
 }

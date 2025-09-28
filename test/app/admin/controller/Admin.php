@@ -68,7 +68,7 @@ class Admin extends Base
             $params['id'] = rand(1000000, 9999999);
             $params['create_time'] = time();
             $params['last_login_time'] = time();
-            $params['pid'] = $pid ?? 0;
+            $params['pid'] = $pid ?? $this->adminInfo['id'];
             $params['password'] = getMd5Password($params['password']);
             Db::name('admin')->insert($params);
             return apiSuccess();

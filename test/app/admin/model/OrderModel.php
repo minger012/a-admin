@@ -13,6 +13,6 @@ class OrderModel extends Model
 
     // 订单类型
     const TYPE_1 = 1;// 人工
-    const TYPE_2 = 2;// 会员
+    const TYPE_2 = 2;// 虚拟
     const TYPE_3 = 3;// 赠送
 }

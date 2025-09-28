@@ -53,6 +53,15 @@ class Coupon extends Base
         if (!$validate->check($params)) {
             return apiError($validate->getError());
         }
+        if ($params['expir_type'] == 1) {
+            if (!isset($params['expir_day'])) {
+                return apiError('请输入天数');
+            }
+        } else {
+            if (!isset($params['start_time']) || !isset($params['end_time'])) {
+                return apiError('请输入正确的日期');
+            }
+        }
         $params['create_time'] = time();
         Db::name('coupon')->insert($params);
         return apiSuccess();
