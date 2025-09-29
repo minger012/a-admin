@@ -101,3 +101,10 @@ function filtrationStr($str)
     $str = htmlspecialchars(trim($str)); // 过滤HTML和空格
     return addslashes($str); // 防止SQL注入
 }
+
+// 时间戳 + 随机数
+function generateShortId() {
+    $timePart = time() % 100000; // 取时间戳的后5位
+    $randomPart = mt_rand(1000, 9999); // 4位随机数
+    return (int)($timePart . $randomPart);
+}

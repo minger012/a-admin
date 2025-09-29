@@ -168,18 +168,15 @@ class Withdraw extends Base
         }
     }
 
+    // 待审核数量
     public function withdrawCount()
     {
         try {
-            $where = [['w.state', '=', 0]];
-            $query = Db::table('withdraw')
-                ->alias('w')
-                ->join('user u', 'w.uid = u.id');
-
+            $where = [['state', '=', 0]];
             if (!$this->isSuperAdmin()) {
-                $where[] = ['u.admin_id', '=', $this->adminInfo['id']];
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
             }
-            $count = $query->where($where)->count();
+            $count = Db::table('withdraw')->where($where)->count();
             return apiSuccess('success', ['count' => $count]);
         } catch (\Exception $e) {
             return apiError($e->getMessage());

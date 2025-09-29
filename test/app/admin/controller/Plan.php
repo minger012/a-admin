@@ -71,6 +71,7 @@ class Plan extends Base
         foreach ($this->jsonField as $field) {
             $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
         }
+        $params['number'] = generateShortId();
         $params['update_time'] = time();
         $params['create_time'] = time();
         Db::name('plan')->insert($params);
