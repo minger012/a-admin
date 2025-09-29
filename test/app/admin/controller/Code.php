@@ -17,17 +17,17 @@ class Code extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['state'])) {
+        if (!empty($params['state'])) {
             $where[] = ['state', '=', $params['state']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['create_time', '<=', $params['eTime']];
         }
         try {
-            if (isset($params['name'])) {
+            if (!empty($params['name'])) {
                 $admin_id = $res = Db::name('admin')->where(['username' => $params['name']])->value('id');
                 if (!empty($admin_id)) {
                     $where[] = ['admin_id', '=', $params['admin_id']];

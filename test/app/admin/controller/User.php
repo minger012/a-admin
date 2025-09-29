@@ -21,35 +21,35 @@ class User extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['uid'])) {
+        if (!empty($params['uid'])) {
             $where[] = ['a.uid', '=', $params['uid']];
         }
-        if (isset($params['username'])) {
+        if (!empty($params['username'])) {
             $where[] = ['a.username', '=', $params['username']];
         }
         $update = [];
-        if (isset($params['name'])) {
+        if (!empty($params['name'])) {
             $update['name'] = $params['name'];
         }
-        if (isset($params['fb_id'])) {
+        if (!empty($params['fb_id'])) {
             $where[] = ['a.fb_id', '=', $params['fb_id']];
         }
-        if (isset($params['lang'])) {
+        if (!empty($params['lang'])) {
             $where[] = ['a.lang', '=', $params['lang']];
         }
-        if (isset($params['lang'])) {
+        if (!empty($params['lang'])) {
             $where[] = ['a.lang', '=', $params['lang']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
                 $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
-            } elseif (isset($params['admin_username'])) {
+            } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
                     $where[] = ['a.admin_id', '=', $admin_id];

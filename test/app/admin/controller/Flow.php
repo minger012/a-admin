@@ -16,38 +16,38 @@ class Flow extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['uid'])) {
+        if (!empty($params['uid'])) {
             $where[] = ['a.uid', '=', $params['uid']];
         }
-        if (isset($params['username'])) {
+        if (!empty($params['username'])) {
             $where[] = ['b.username', '=', $params['username']];
         }
-        if (isset($params['fb_id'])) {
+        if (!empty($params['fb_id'])) {
             $where[] = ['a.fb_id', '=', $params['fb_id']];
         }
-        if (isset($params['type'])) {
+        if (!empty($params['type'])) {
             $where[] = ['a.type', '=', $params['type']];
         }
-        if (isset($params['cha'])) {
+        if (!empty($params['cha'])) {
             if ($params['cha'] == 1) {
                 $where[] = ['a.cha', '>', 0];
             } else {
                 $where[] = ['a.cha', '<', 0];
             }
         }
-        if (isset($params['order_no'])) {
+        if (!empty($params['order_no'])) {
             $where[] = ['a.order_no', '=', $params['order_no']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['a.create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['a.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
                 $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
-            } elseif (isset($params['admin_username'])) {
+            } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
                     $where[] = ['a.admin_id', '=', $admin_id];

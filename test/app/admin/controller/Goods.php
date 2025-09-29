@@ -20,10 +20,10 @@ class Goods extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['id'])) {
+        if (!empty($params['id'])) {
             $where[] = ['id', '=', $params['id']];
         }
-        if (isset($params['state'])) {
+        if (!empty($params['state'])) {
             $where[] = ['state', '=', $params['state']];
         }
         try {

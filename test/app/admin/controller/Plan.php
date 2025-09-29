@@ -20,16 +20,16 @@ class Plan extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['id'])) {
+        if (!empty($params['id'])) {
             $where[] = ['id', '=', $params['id']];
         }
-        if (isset($params['state'])) {
+        if (!empty($params['state'])) {
             $where[] = ['state', '=', $params['state']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['create_time', '<=', $params['eTime']];
         }
         try {

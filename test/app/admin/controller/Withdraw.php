@@ -17,26 +17,26 @@ class Withdraw extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['uid'])) {
+        if (!empty($params['uid'])) {
             $where[] = ['w.uid', '=', $params['uid']];
         }
-        if (isset($params['state'])) {
+        if (!empty($params['state'])) {
             $where[] = ['w.state', '=', $params['state']];
         }
-        if (isset($params['fb_id'])) {
+        if (!empty($params['fb_id'])) {
             $where[] = ['w.fb_id', '<=', $params['fb_id']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['w.create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['w.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
                 $adminId = $this->adminInfo['id'];
                 $where[] = ['u.admin_id', '=', $adminId];
-            } elseif (isset($params['admin_username'])) {
+            } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
                     $where[] = ['w.admin_id', '=', $admin_id];
@@ -168,4 +168,21 @@ class Withdraw extends Base
         }
     }
 
+    public function withdrawCount()
+    {
+        try {
+            $where = [['w.state', '=', 0]];
+            $query = Db::table('withdraw')
+                ->alias('w')
+                ->join('user u', 'w.uid = u.id');
+
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['u.admin_id', '=', $this->adminInfo['id']];
+            }
+            $count = $query->where($where)->count();
+            return apiSuccess('success', ['count' => $count]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
 }

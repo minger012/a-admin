@@ -17,10 +17,10 @@ class Coupon extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['create_time', '<=', $params['eTime']];
         }
         try {
@@ -54,11 +54,11 @@ class Coupon extends Base
             return apiError($validate->getError());
         }
         if ($params['expir_type'] == 1) {
-            if (!isset($params['expir_day'])) {
+            if (empty($params['expir_day'])) {
                 return apiError('请输入天数');
             }
         } else {
-            if (!isset($params['start_time']) || !isset($params['end_time'])) {
+            if (!empty($params['start_time']) || !empty($params['end_time'])) {
                 return apiError('请输入正确的日期');
             }
         }

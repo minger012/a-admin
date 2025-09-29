@@ -16,28 +16,28 @@ class Order extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (isset($params['uid'])) {
+        if (!empty($params['uid'])) {
             $where[] = ['o.uid', '=', $params['uid']];
         }
-        if (isset($params['username'])) {
+        if (!empty($params['username'])) {
             $where[] = ['u.username', '=', $params['username']];
         }
-        if (isset($params['fb_id'])) {
+        if (!empty($params['fb_id'])) {
             $where[] = ['o.fb_id', '=', $params['fb_id']];
         }
-        if (isset($params['type'])) {
+        if (!empty($params['type'])) {
             $where[] = ['o.type', '=', $params['type']];
         }
-        if (isset($params['sTime'])) {
+        if (!empty($params['sTime'])) {
             $where[] = ['o.create_time', '>=', $params['sTime']];
         }
-        if (isset($params['eTime'])) {
+        if (!empty($params['eTime'])) {
             $where[] = ['o.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
                 $where[] = ['o.admin_id', '=', $this->adminInfo['id']];
-            } elseif (isset($params['admin_username'])) {
+            } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
                     $where[] = ['o.admin_id', '=', $admin_id];
