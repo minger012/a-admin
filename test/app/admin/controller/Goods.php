@@ -65,6 +65,7 @@ class Goods extends Base
         foreach ($this->jsonField as $field) {
             $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
         }
+        $params['update_time'] = time();
         $params['create_time'] = time();
         Db::name('goods')->insert($params);
         return apiSuccess();
@@ -86,6 +87,7 @@ class Goods extends Base
             foreach ($this->jsonField as $field) {
                 $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
             }
+            $params['update_time'] = time();
             Db::name('goods')
                 ->where(['id' => $params['id']])
                 ->update($params);
