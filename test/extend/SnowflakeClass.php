@@ -1,6 +1,6 @@
 <?php
 
-class Snowflake
+class SnowflakeClass
 {
     // 时间戳基准 (2010-11-04 09:42:54 UTC)
     const EPOCH = 1288834974657;
