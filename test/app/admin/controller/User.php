@@ -7,7 +7,6 @@ use app\admin\validate\UserValidate;
 use app\common\model\FlowModel;
 use app\common\validate\CommonValidate;
 use app\common\service\OnlineUserService;
-use Snowflake;
 use think\facade\Db;
 
 class User extends Base
@@ -27,9 +26,11 @@ class User extends Base
         if (!empty($params['username'])) {
             $where[] = ['a.username', '=', $params['username']];
         }
-        $update = [];
         if (!empty($params['name'])) {
             $update['name'] = $params['name'];
+        }
+        if (!empty($params['short_name'])) {
+            $update['short_name'] = $params['short_name'];
         }
         if (!empty($params['fb_id'])) {
             $where[] = ['a.fb_id', '=', $params['fb_id']];
@@ -37,8 +38,8 @@ class User extends Base
         if (!empty($params['lang'])) {
             $where[] = ['a.lang', '=', $params['lang']];
         }
-        if (!empty($params['lang'])) {
-            $where[] = ['a.lang', '=', $params['lang']];
+        if (!empty($params['operate_id'])) {
+            $where[] = ['a.operate_id', '=', $params['operate_id']];
         }
         if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];

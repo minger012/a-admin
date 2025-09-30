@@ -66,10 +66,10 @@ class Flow extends Base
             $res = [
                 'list' => $paginator->items(),       // 当前页数据
                 'money' => round(Db::table('flow')
-                    ->alias('o')
-                    ->join('user u', 'a.uid = b.id')
+                    ->alias('a')
+                    ->join('user b', 'a.uid = b.id')
                     ->where($where)
-                    ->sum('a.money'), 2),
+                    ->sum('a.cha'), 2),
                 'total' => $paginator->total(),       // 总记录数
                 'page' => $paginator->currentPage(), // 当前页码
                 'page_size' => $paginator->listRows(),    // 每页记录数
