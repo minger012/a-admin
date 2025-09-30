@@ -3,10 +3,13 @@
 namespace app\admin\controller;
 
 use app\admin\model\OrderModel;
+use app\admin\validate\PlanOrderValidate;
 use app\admin\validate\UserValidate;
 use app\common\model\FlowModel;
+use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
 use app\common\service\OnlineUserService;
+use SnowflakeClass;
 use think\facade\Db;
 
 class User extends Base
@@ -20,6 +23,7 @@ class User extends Base
             return apiError($validate->getError());
         }
         $where = [];
+        $planWhere = [];
         if (!empty($params['uid'])) {
             $where[] = ['a.uid', '=', $params['uid']];
         }
@@ -49,7 +53,7 @@ class User extends Base
         }
         try {
             if (!$this->isSuperAdmin()) {
-                $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
+                $where[] = $planWhere[] = ['a.admin_id', '=', $this->adminInfo['id']];
             } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
@@ -75,6 +79,7 @@ class User extends Base
             }
             $res = [
                 'list' => $list,       // 当前页数据
+                'planList' => Db::table('plan')->where($planWhere)->field('id,name')->select()->toArray(),// 计划列表
                 'total' => $paginator->total(),       // 总记录数
                 'page' => $paginator->currentPage(), // 当前页码
                 'page_size' => $paginator->listRows(),    // 每页记录数
@@ -360,6 +365,52 @@ class User extends Base
         }
     }
 
+    // 派单
+    public function addPlanOrder()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new PlanOrderValidate();
+        if (!$validate->check($params)) {
+            return apiError($validate->getError());
+        }
+        try {
+            $admin_id = Db::table('user')->where('id', $params['uid'])->value('admin_id');
+            if (empty($admin_id)) {
+                return apiError('uid 有误');
+            }
+            $sqlArr = [];
+            foreach ($params['plan'] as $v) {
+                if ($v['min'] > $v['max']) {
+                    return apiError($v['plan_id'] . 'min不能比max大');
+                }
+                $planData = Db::table('plan')
+                    ->alias('a')
+                    ->join('goods b', 'a.goods_id = b.id')
+                    ->where('a.id', $v['plan_id'])
+                    ->field('a.name as plan_name,a.goods_id,b.name as goods_name')
+                    ->find();
+                if (empty($planData)) {
+                    return apiError($v['plan_id'] . '数据不存在');
+                }
+                $v = array_merge($planData, $v);
+                $v['cd'] = $v['cd'] * 60;
+                $v['uid'] = $params['uid'];
+                $v['admin_id'] = $admin_id;
+                $v['fb_id'] = $this->fb_id;
+                $v['order_no'] = 'p_' . (new SnowflakeClass(0, 0))->nextId();
+                $v['state'] = PlanOrderModel::state_0;
+                $v['create_time'] = time();
+                $v['update_time'] = time();
+                $sqlArr[] = $v;
+            }
+            Db::name('plan_order')->insertAll($sqlArr);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e);
+        }
+    }
+
 
     //获取在线用户列表
     public function onlineUserList()
@@ -392,5 +443,4 @@ class User extends Base
             return apiError($e->getMessage());
         }
     }
-
 }
