@@ -220,9 +220,8 @@ class User extends Base
                 throw new \Exception(lang('login_null'));
             }
             //插入订单表
-            $fb_id = (new Snowflake(0, 0))->nextId();
             Db::name('order')->insert([
-                'fb_id' => $fb_id,
+                'fb_id' => $this->fb_id,
                 'uid' => $userInfo['id'],
                 'admin_id' => $this->adminInfo['id'],
                 'remarks' => $params['remarks'] ?? '',
@@ -239,7 +238,7 @@ class User extends Base
                 ->update();
             //添加流水
             Db::table('flow')->insert([
-                'fb_id' => $fb_id,
+                'fb_id' => $this->fb_id,
                 'uid' => $userInfo['id'],
                 'type' => $params['type'],
                 'before' => $userInfo['money'],

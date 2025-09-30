@@ -54,8 +54,8 @@ class Flow extends Base
                 }
             }
             $query = Db::table('flow')
-                ->alias('o')
-                ->join('user u', 'a.uid = b.id')
+                ->alias('a')
+                ->join('user b', 'a.uid = b.id')
                 ->where($where)
                 ->field('a.*, b.username');
             $paginator = $query->order('a.id', 'desc')// 按ID倒序（可选）

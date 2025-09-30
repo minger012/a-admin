@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\admin\model\AdminModel;
 use app\BaseController;
+use Snowflake;
 use think\exception\HttpResponseException;
 
 class Base extends BaseController
@@ -13,6 +14,8 @@ class Base extends BaseController
      * @var
      */
     protected $adminInfo;
+    // 关联组id
+    protected $fb_id;
 
     protected $menuCfg = [
         ['id' => 1],// 管理员管理
@@ -56,6 +59,7 @@ class Base extends BaseController
             // 抛出带有JSON响应的异常
             throw new HttpResponseException(apiError('no_auth', -2));
         }
+        $this->fb_id = (new Snowflake(0, 0))->nextId();
     }
 
     //权限判断 todo
