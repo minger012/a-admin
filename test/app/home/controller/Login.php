@@ -3,8 +3,6 @@
 namespace app\home\controller;
 
 use app\BaseController;
-use app\common\model\ConfigModel;
-use app\common\validate\CommonValidate;
 use app\home\model\UserModel;
 use app\home\validate\UserValidate;
 use think\facade\Db;

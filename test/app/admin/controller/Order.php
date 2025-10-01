@@ -47,7 +47,7 @@ class Order extends Base
                 ->alias('o')
                 ->join('user u', 'o.uid = u.id')
                 ->where($where)
-                ->field('o.*, u.username');
+                ->field('o.*, u.username,u short_name');
             $paginator = $query->order('o.id', 'desc')// 按ID倒序（可选）
             ->paginate([
                 'list_rows' => $params['pageSize'] ?? 10, // 每页记录数

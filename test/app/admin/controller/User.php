@@ -42,9 +42,6 @@ class User extends Base
         if (!empty($params['lang'])) {
             $where[] = ['a.lang', '=', $params['lang']];
         }
-        if (!empty($params['operate_id'])) {
-            $where[] = ['a.operate_id', '=', $params['operate_id']];
-        }
         if (!empty($params['sTime'])) {
             $where[] = ['create_time', '>=', $params['sTime']];
         }
@@ -220,7 +217,7 @@ class User extends Base
             $userInfo = Db::name('user')
                 ->where($where)
                 ->lock(true)
-                ->field('money,id,name,state,operate_id')
+                ->field('money,id,name,state,admin_id')
                 ->find();
             if (empty($userInfo)) {
                 throw new \Exception(lang('login_null'));
@@ -229,7 +226,7 @@ class User extends Base
             Db::name('order')->insert([
                 'fb_id' => $this->fb_id,
                 'uid' => $userInfo['id'],
-                'admin_id' => $this->adminInfo['id'],
+                'admin_id' => $userInfo['admin_id'],
                 'remarks' => $params['remarks'] ?? '',
                 'user_remarks' => $params['user_remarks'] ?? '',
                 'money' => $params['money'],
@@ -246,6 +243,7 @@ class User extends Base
             Db::table('flow')->insert([
                 'fb_id' => $this->fb_id,
                 'uid' => $userInfo['id'],
+                'admin_id' => $userInfo['admin_id'],
                 'type' => $params['type'],
                 'before' => $userInfo['money'],
                 'after' => $userInfo['money'] + $params['money'],
