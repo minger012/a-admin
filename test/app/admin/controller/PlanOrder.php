@@ -34,7 +34,7 @@ class PlanOrder extends Base
         if (!empty($params['order_no'])) {
             $where[] = ['a.order_no', '=', $params['order_no']];
         }
-        if (!empty($params['state']) || $params['state'] == 0) {
+        if (isset($params['state']) && $params['state'] != '') {
             $where[] = ['a.state', '=', $params['state']];
         }
         if (!empty($params['sTime'])) {

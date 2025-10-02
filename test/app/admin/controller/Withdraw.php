@@ -20,7 +20,7 @@ class Withdraw extends Base
         if (!empty($params['uid'])) {
             $where[] = ['w.uid', '=', $params['uid']];
         }
-        if (!empty($params['state']) || $params['state'] == 0) {
+        if (isset($params['state']) && $params['state'] != '') {
             $where[] = ['w.state', '=', $params['state']];
         }
         if (!empty($params['fb_id'])) {

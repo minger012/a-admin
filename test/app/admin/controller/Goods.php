@@ -23,7 +23,7 @@ class Goods extends Base
         if (!empty($params['id'])) {
             $where[] = ['id', '=', $params['id']];
         }
-        if (!empty($params['state']) || $params['state'] == 0) {
+        if (isset($params['state']) && $params['state'] != '') {
             $where[] = ['state', '=', $params['state']];
         }
         try {
@@ -38,7 +38,7 @@ class Goods extends Base
             // 字段转化
             foreach ($list as $key => $value) {
                 foreach ($this->jsonField as $field) {
-                    $list[$key][$field] = !empty($value[$field]) ? json_decode(base64_decode($value[$field]),true) : [];
+                    $list[$key][$field] = !empty($value[$field]) ? json_decode(base64_decode($value[$field]), true) : [];
                 }
             }
             $res = [

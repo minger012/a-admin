@@ -23,7 +23,7 @@ class Plan extends Base
         if (!empty($params['id'])) {
             $where[] = ['id', '=', $params['id']];
         }
-        if (!empty($params['state']) || $params['state'] == 0) {
+        if (isset($params['state']) && $params['state'] != '') {
             $where[] = ['state', '=', $params['state']];
         }
         if (!empty($params['sTime'])) {
