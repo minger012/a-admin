@@ -11,6 +11,19 @@ use think\facade\Db;
 
 class User extends Base
 {
+    // 获取信息
+    public function info(UserModel $model)
+    {
+        try {
+            $uif = $model::where(['id' => $this->userInfo['id']])
+                ->field('money')
+                ->find()->toArray();
+            return apiSuccess('success', $uif);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
     //退出登录
     public function loginOut(UserModel $model)
     {
@@ -287,4 +300,6 @@ class User extends Base
             return apiError($e->getMessage());
         }
     }
+
+
 }

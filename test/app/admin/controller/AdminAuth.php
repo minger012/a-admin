@@ -47,7 +47,6 @@ class AdminAuth extends Base
         } catch (\Exception $e) {
             return apiError($e->getMessage());
         }
-
     }
 
     public function edit()

@@ -58,9 +58,10 @@ class Plan extends Base
                 ->join('goods b', 'a.goods_id = b.id')
                 ->field('a.*,b.company,b.type_name,b.logo as goods_logo ,b.image as goods_image,b.google_play,b.app_store,b.app_info')
                 ->find();
+            $planData['money'] = Db::table('user')->where('id', $this->userInfo['id'])->value('money');
             $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
             $planData['goods_image'] = getDomain() . $planData['goods_image'];
-            $planData['app_info'] = $planData['app_info'];
+            $planData['app_info'] = !empty($planData['app_info']) ? json_decode(base64_decode($planData['app_info']), true) : [];
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {
             return apiError($e);
