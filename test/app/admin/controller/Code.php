@@ -17,7 +17,7 @@ class Code extends Base
             return apiError($validate->getError());
         }
         $where = [];
-        if (!empty($params['state'])) {
+        if (!empty($params['state']) || $params['state'] == 0) {
             $where[] = ['state', '=', $params['state']];
         }
         if (!empty($params['sTime'])) {

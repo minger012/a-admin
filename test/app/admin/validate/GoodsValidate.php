@@ -27,7 +27,7 @@ class GoodsValidate extends Validate
         'company' => 'require|max:100',
         'type_name' => 'require|max:100',
         'intro' => 'require',
-        'sort' => 'integer|gt:0',
+        'sort' => 'integer',
         'category' => 'integer|gt:0',
         'is_home' => 'integer|in:0,1',
         'is_hot' => 'integer|in:0,1',

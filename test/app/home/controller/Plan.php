@@ -7,9 +7,6 @@ use think\facade\Db;
 
 class Plan extends Base
 {
-    // json字段
-    protected $jsonField = ['content', 'orienteering', 'rule'];
-
     public function list()
     {
         $input = request()->getContent();
@@ -31,9 +28,7 @@ class Plan extends Base
             $list = $paginator->items();
             // 字段转化
             foreach ($list as $key => $value) {
-                foreach ($this->jsonField as $field) {
-                    $list[$key][$field] = !empty($value[$field]) ? json_decode($value[$field], true) : [];
-                }
+
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -61,11 +56,11 @@ class Plan extends Base
                 ->where('a.id', $params['id'])
                 ->alias('a')
                 ->join('goods b', 'a.goods_id = b.id')
-                ->field('a.*,b.company')
+                ->field('a.*,b.company,b.type_name,b.logo as goods_logo ,b.image as goods_image,b.google_play,b.app_store,b.app_info')
                 ->find();
-            foreach ($this->jsonField as $field) {
-                $planData[$field] = !empty($value[$field]) ? json_decode($value[$field], true) : [];
-            }
+            $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
+            $planData['goods_image'] = getDomain() . $planData['goods_image'];
+            $planData['app_info'] = stripslashes($planData['app_info']);
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {
             return apiError($e);
