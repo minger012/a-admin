@@ -45,7 +45,7 @@ class AdminModel extends Model
             $token = (new EncryptClass())->myEncrypt(json_encode([
                 'username' => $username,
                 'password' => $password,
-                'time' => time()
+                'TimeClass' => time()
             ]), self::$_token_secretKey);
             // 权限
             $string = Db::name('admin_auth')->where(['id' => $admin['auth_id']])->value('auth');

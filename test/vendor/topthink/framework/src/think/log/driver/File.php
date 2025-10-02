@@ -82,7 +82,7 @@ class File implements LogHandlerInterface
                 }
 
                 $message[] = $this->config['json'] ?
-                json_encode(['time' => $time, 'type' => $type, 'msg' => $msg], $this->config['json_options']) :
+                json_encode(['TimeClass' => $time, 'type' => $type, 'msg' => $msg], $this->config['json_options']) :
                 sprintf($this->config['format'], $time, $type, $msg);
             }
 

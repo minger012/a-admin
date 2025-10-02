@@ -14,7 +14,7 @@ return [
     'params_error' => '参数错误',
     'time_error' => '本期已结束',
     'non_existent' => '数据不存在',
-    'user_invitation_error' => '邀请码错误',
+    'user_invitation_error' => '授权码错误',
     'user_impose' => '你被限制下单',
     'money_error' => '余额不足',
     'order_success' => '下单成功',

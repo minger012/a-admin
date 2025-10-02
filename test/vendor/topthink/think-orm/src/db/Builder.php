@@ -520,7 +520,7 @@ abstract class Builder
             $value = $value->__toString();
         }
 
-        if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && strpos($exp, 'TIME') === false) {
+        if (is_scalar($value) && !in_array($exp, ['EXP', 'NOT NULL', 'NULL', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN']) && strpos($exp, 'TimeClass') === false) {
             if (is_string($value) && 0 === strpos($value, ':') && $query->isBind(substr($value, 1))) {
             } else {
                 $name  = $query->bindValue($value, $bindType);

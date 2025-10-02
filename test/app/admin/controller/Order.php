@@ -17,38 +17,38 @@ class Order extends Base
         }
         $where = [];
         if (!empty($params['uid'])) {
-            $where[] = ['o.uid', '=', $params['uid']];
+            $where[] = ['a.uid', '=', $params['uid']];
         }
         if (!empty($params['username'])) {
-            $where[] = ['u.username', '=', $params['username']];
+            $where[] = ['b.username', '=', $params['username']];
         }
         if (!empty($params['fb_id'])) {
-            $where[] = ['o.fb_id', '=', $params['fb_id']];
+            $where[] = ['a.fb_id', '=', $params['fb_id']];
         }
         if (!empty($params['type'])) {
-            $where[] = ['o.type', '=', $params['type']];
+            $where[] = ['a.type', '=', $params['type']];
         }
         if (!empty($params['sTime'])) {
-            $where[] = ['o.create_time', '>=', $params['sTime']];
+            $where[] = ['a.create_time', '>=', $params['sTime']];
         }
         if (!empty($params['eTime'])) {
-            $where[] = ['o.create_time', '<=', $params['eTime']];
+            $where[] = ['a.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
-                $where[] = ['o.admin_id', '=', $this->adminInfo['id']];
+                $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
             } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
-                    $where[] = ['o.admin_id', '=', $admin_id];
+                    $where[] = ['a.admin_id', '=', $admin_id];
                 }
             }
             $query = Db::table('order')
-                ->alias('o')
-                ->join('user u', 'o.uid = u.id')
+                ->alias('a')
+                ->join('user b', 'a.uid = b.id')
                 ->where($where)
-                ->field('o.*, u.username,u short_name');
-            $paginator = $query->order('o.id', 'desc')// 按ID倒序（可选）
+                ->field('a.*, b.username,b.short_name');
+            $paginator = $query->order('a.id', 'desc')// 按ID倒序（可选）
             ->paginate([
                 'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
                 'page' => $params['page'] ?? 1,     // 当前页码
@@ -69,7 +69,6 @@ class Order extends Base
         } catch (\Exception $e) {
             return apiError($e->getMessage());
         }
-
     }
 
 }

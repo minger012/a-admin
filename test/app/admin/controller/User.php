@@ -395,7 +395,7 @@ class User extends Base
                 $v['uid'] = $params['uid'];
                 $v['admin_id'] = $admin_id;
                 $v['fb_id'] = $this->fb_id;
-                $v['order_no'] = 'p_' . (new SnowflakeClass(0, 0))->nextId();
+                $v['order_no'] = 'p_' . getFbId();
                 $v['state'] = PlanOrderModel::state_0;
                 $v['create_time'] = time();
                 $v['update_time'] = time();

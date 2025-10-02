@@ -11,20 +11,6 @@ use think\facade\Db;
 
 class User extends Base
 {
-    //获取积分
-    public function getMoney(UserModel $model)
-    {
-        try {
-            $data = $model::where(['username' => $this->userInfo['username']])
-                ->field('money,score,lv')
-                ->find();
-            $data['time_now'] = time();
-            return apiSuccess('success', $data);
-        } catch (\Exception $e) {
-            return apiError($e->getMessage());
-        }
-    }
-
     //退出登录
     public function loginOut(UserModel $model)
     {
@@ -278,6 +264,24 @@ class User extends Base
             }
             $model::where(['username' => $this->userInfo['username']])
                 ->update(['password' => getMd5Password($params['password'])]);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    // 签到
+    public function sign(UserModel $model)
+    {
+        try {
+            $uif = $model::where(['id' => $this->userInfo['id']])
+                ->field('sign_time')
+                ->find()->toArray();
+            if (isToday($uif['sign_time'])) {
+                throw new \Exception(lang('已签到'));
+            }
+            $model::where(['id' => $this->userInfo['id']])
+                ->update(['sign_time' => time()]);
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e->getMessage());

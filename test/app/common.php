@@ -108,3 +108,27 @@ function generateShortId() {
     $randomPart = mt_rand(1000, 9999); // 4位随机数
     return (int)($timePart . $randomPart);
 }
+
+function getFbId()
+{
+    return (new SnowflakeClass(0, 0))->nextId();
+}
+
+/**
+ * 判断时间戳是否是今天
+ * @param int $timestamp 要判断的时间戳
+ * @return bool
+ */
+function isToday($timestamp)
+{
+    return date('Y-m-d', $timestamp) === date('Y-m-d');
+}
+
+/**
+ * 获取今天0点的时间戳
+ * @return int
+ */
+function getTodayStart()
+{
+    return strtotime('today');
+}

@@ -94,8 +94,8 @@ class Admin extends Base
                 return apiError('non_existent');
             }
             $update = [];
-            if ($params['pusername']) {
-                $pid = Db::name('admin')->where(['username' => $params['pusername']])->value('id');
+            if (!empty($params['username'])) {
+                $pid = Db::name('admin')->where(['username' => $params['username']])->value('id');
                 if (!$pid) {
                     return apiError('non_existent');
                 }

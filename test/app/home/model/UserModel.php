@@ -47,7 +47,7 @@ class UserModel extends Model
             $token = (new EncryptClass())->myEncrypt(json_encode([
                 'username' => $username,
                 'password' => $password,
-                'time' => time()
+                'TimeClass' => time()
             ]), self::$_token_secretKey);
             // 返回数据
             $data = [
