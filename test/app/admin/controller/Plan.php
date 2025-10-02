@@ -44,7 +44,7 @@ class Plan extends Base
             // 字段转化
             foreach ($list as $key => $value) {
                 foreach ($this->jsonField as $field) {
-                    $list[$key][$field] = !empty($value[$field]) ? json_decode($value[$field], true) : [];
+                    $list[$key][$field] = !empty($value[$field]) ? json_decode(base64_decode($value[$field]), true) : [];
                 }
             }
             $res = [
@@ -69,7 +69,7 @@ class Plan extends Base
             return apiError($validate->getError());
         }
         foreach ($this->jsonField as $field) {
-            $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
+            $params[$field] = !empty($params[$field]) ? base64_encode(json_encode($params[$field], JSON_UNESCAPED_UNICODE)) : '';
         }
         $params['number'] = generateShortId();
         $params['update_time'] = time();
@@ -92,7 +92,7 @@ class Plan extends Base
                 return apiError('non_existent');
             }
             foreach ($this->jsonField as $field) {
-                $params[$field] = !empty($params[$field]) ? json_encode($params[$field], JSON_UNESCAPED_UNICODE) : '';
+                $params[$field] = !empty($params[$field]) ? base64_encode(json_encode($params[$field], JSON_UNESCAPED_UNICODE)) : '';
             }
             $params['update_time'] = time();
             Db::name('plan')

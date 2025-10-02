@@ -60,7 +60,7 @@ class Plan extends Base
                 ->find();
             $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
             $planData['goods_image'] = getDomain() . $planData['goods_image'];
-            $planData['app_info'] = stripslashes($planData['app_info']);
+            $planData['app_info'] = $planData['app_info'];
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {
             return apiError($e);
