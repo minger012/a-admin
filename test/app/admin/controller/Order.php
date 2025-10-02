@@ -46,8 +46,9 @@ class Order extends Base
             $query = Db::table('order')
                 ->alias('a')
                 ->join('user b', 'a.uid = b.id')
+                ->join('admin c','a.admin_id = c.id')
                 ->where($where)
-                ->field('a.*, b.username,b.short_name');
+                ->field('a.*, b.username,b.short_name,c.username as admin_username');
             $paginator = $query->order('a.id', 'desc')// 按ID倒序（可选）
             ->paginate([
                 'list_rows' => $params['pageSize'] ?? 10, // 每页记录数

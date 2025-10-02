@@ -48,6 +48,6 @@ class CommonValidate extends Validate
         'id' => 'in:1,2,3,9',
     ];
     public $time_id = [
-        'id' => 'in:1,2,3,4',
+        'id' => 'require|in:0,1,2,3',
     ];
 }

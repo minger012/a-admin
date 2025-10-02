@@ -50,6 +50,7 @@ class PlanOrder extends Base
             $paginator = Db::table('plan_order')
                 ->alias('a')
                 ->join('user b', 'a.uid = b.id')
+                ->field('a.*,b.username,b.short_name')
                 ->where($where)
                 ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
