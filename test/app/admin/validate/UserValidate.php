@@ -22,7 +22,7 @@ class UserValidate extends Validate
 
     protected $rule = [
         'username' => 'max:20|regex:/^[a-zA-Z]+[a-zA-Z0-9]*$/',
-        'name' => 'max:20|regex:/^[a-zA-Z]+[a-zA-Z0-9]*$/',
+        'name' => 'max:20|chsDash',
         'phone' => 'mobile',
         'lv' => 'integer|gt:0',
         'score' => 'integer|gt:0',

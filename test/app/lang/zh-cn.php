@@ -26,6 +26,9 @@ return [
     'api_limit_error' => '操作频繁，请稍等后再试',
     'withdraw_impose' => '限制提现，请联系客服',
     'recharge_impose' => '此账号被限制充值',
+    'coupon_time_error' => '该优惠券不在使用时间',
+    'coupon_is_use' => '该优惠券已使用',
+    'coupon_error' => '该优惠券不可使用',
 
     /******字段翻译********/
     'username' => '账户',

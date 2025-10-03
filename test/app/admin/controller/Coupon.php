@@ -53,6 +53,15 @@ class Coupon extends Base
         if (!$validate->check($params)) {
             return apiError($validate->getError());
         }
+        if ($params['type'] == 5) {
+            if (!$params['discount_amount']) {
+                return apiError('请输入固定金额');
+            }
+        } else {
+            if (!$params['min'] || !$params['max']) {
+                return apiError('请输入金额范围');
+            }
+        }
         if ($params['expir_type'] == 1) {
             if (empty($params['expir_day'])) {
                 return apiError('请输入天数');
@@ -76,6 +85,24 @@ class Coupon extends Base
             return apiError($validate->getError());
         }
         try {
+            if ($params['type'] == 5) {
+                if (!$params['discount_amount']) {
+                    return apiError('请输入固定金额');
+                }
+            } else {
+                if (!$params['min'] || !$params['max']) {
+                    return apiError('请输入金额范围');
+                }
+            }
+            if ($params['expir_type'] == 1) {
+                if (empty($params['expir_day'])) {
+                    return apiError('请输入天数');
+                }
+            } else {
+                if (!empty($params['start_time']) || !empty($params['end_time'])) {
+                    return apiError('请输入正确的日期');
+                }
+            }
             $res = Db::name('coupon')->where(['id' => $params['id']])->find();
             if (!$res) {
                 return apiError('non_existent');

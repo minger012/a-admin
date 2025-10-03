@@ -301,5 +301,55 @@ class User extends Base
         }
     }
 
+    // 优惠券列表
+    public function couponList()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new CommonValidate();
+        if (!$validate->append('state', 'require|in:0,1,2')->check($params, $validate->page_rule)) {
+            return apiError($validate->getError());
+        }
+        try {
+            $where = [['a.uid', '=', $this->userInfo['id']]];
+            if ($params['state'] == 1) {
+                $where[] = [['a.use_time', '=', 0]];
+            } elseif ($params['state'] == 2) {
+                $where[] = [['a.use_time', '!=', 0]];
+            }
+            $paginator = Db::table('user_coupon')
+                ->alias('a')
+                ->join('coupon b','a.cid=b.id')
+                ->field('a.*,b.name,b.type,b.discount,b.discount_amount')
+                ->where($where)
+                ->order('a.id', 'desc')// 按ID倒序（可选）
+                ->paginate([
+                    'list_rows' => $params['pageSize'] ?? 100, // 每页记录数
+                    'page' => $params['page'] ?? 1,     // 当前页码
+                ]);
+            $list = $paginator->items();
+            foreach ($list as $k => $v) {
+                if ($v['use_time']) {
+                    $list[$k]['state'] = 2;// 已使用
+                } else {
+                    if ($v['end_time'] > time()) {
+                        $list[$k]['state'] = 1;// 未使用
+                    } else {
+                        $list[$k]['state'] = 3;// 已过期
+                    }
+                }
+            }
+            $res = [
+                'list' => $list,       // 当前页数据
+                'total' => $paginator->total(),       // 总记录数
+                'page' => $paginator->currentPage(), // 当前页码
+                'page_size' => $paginator->listRows(),    // 每页记录数
+                'total_page' => $paginator->lastPage(),    // 总页数
+            ];
+            return apiSuccess('success', $res);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
 
 }
