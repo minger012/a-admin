@@ -25,12 +25,12 @@ class UserValidate extends Validate
         'name' => 'max:20|chsDash',
         'phone' => 'mobile',
         'lv' => 'integer|gt:0',
-        'score' => 'integer|gt:0',
-        'pledge_money' => 'float|gt:0',
+        'score' => 'integer|egt:0',
+        'pledge_money' => 'float|egt:0',
         'remarks' => 'max:255',
         'withdraw_disabled' => 'max:255',
         'state' => 'integer|in:1,2',
-        'pledge_refund' => 'integer|gt:0',
-        'fb_id' => 'integer|gt:0',
+        'pledge_refund' => 'integer|egt:0',
+        'fb_id' => 'integer|egt:0',
     ];
 }

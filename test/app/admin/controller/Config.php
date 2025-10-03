@@ -7,8 +7,7 @@ use think\facade\Db;
 
 class Config extends Base
 {
-    protected $jsonId = [];
-    public function configList()
+    public function list()
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
@@ -18,7 +17,6 @@ class Config extends Base
         }
         try {
             $paginator = Db::table('config')
-                ->field('id,title,value')
                 ->order('id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
@@ -39,7 +37,7 @@ class Config extends Base
                 ];
             }
             foreach ($list as $k => $v) {
-                $list[$k]['content'] = json_decode(base64_decode($v['content']), true);
+                $list[$k]['content'] = json_decode(base64_decode($v['content']), true) ?? [];
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -54,30 +52,13 @@ class Config extends Base
         }
     }
 
-    public function configEdit()
+    public function edit()
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
         try {
             foreach ($params['arr'] as $v) {
-                $updateData = ['value' => $v['value']];
-
-                if (isset($v['i18n'])) {
-                    // Validate i18n format
-                    if (!is_array($v['i18n'])) {
-                        throw new \Exception('i18n must be an array');
-                    }
-
-                    // Check if all values are strings
-                    foreach ($v['i18n'] as $lang => $text) {
-                        if (!is_string($text)) {
-                            throw new \Exception('All i18n values must be strings');
-                        }
-                    }
-
-                    $updateData['i18n'] = json_encode($v['i18n'], JSON_UNESCAPED_UNICODE);
-                }
-
+                $updateData = ['value' => base64_encode(json_encode($v['value'], JSON_UNESCAPED_UNICODE)) ?? ''];
                 Db::name('config')
                     ->where(['id' => $v['id']])
                     ->update($updateData);
