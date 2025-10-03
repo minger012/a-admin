@@ -35,8 +35,12 @@ class Config extends Base
                     ['id' => 8, 'title' => '服务条款', 'content' => ''],
                     ['id' => 9, 'title' => '广告中心Banner配置', 'content' => ''],
                 ];
+                Db::table('config')->insertAll($list);
             }
             foreach ($list as $k => $v) {
+                if (in_array($v['id'], [1, 2])) {
+                    continue;
+                }
                 $list[$k]['content'] = json_decode(base64_decode($v['content']), true) ?? [];
             }
             $res = [
@@ -58,7 +62,11 @@ class Config extends Base
         $params = json_decode($input, true);
         try {
             foreach ($params['arr'] as $v) {
-                $updateData = ['value' => base64_encode(json_encode($v['value'], JSON_UNESCAPED_UNICODE)) ?? ''];
+                $value = $v['value'];
+                if (!in_array($v['id'], [1, 2])) {
+                    $value = base64_encode(json_encode($v['value'], JSON_UNESCAPED_UNICODE)) ?? '';
+                }
+                $updateData = ['value' => $value];
                 Db::name('config')
                     ->where(['id' => $v['id']])
                     ->update($updateData);

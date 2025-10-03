@@ -27,7 +27,7 @@ class CouponValidate extends Validate
         'state' => 'require|in:0,1',
         'expir_type' => 'require|in:1,2',
         'expir_day' => 'integer|gt:0',
-        'discount' => 'gt:0|max:100',
+        'discount' => 'integer|max:100',
         'discount_amount' => 'gt:0|max:100',
         'min' => 'egt:0',
         'max' => 'egt:0',

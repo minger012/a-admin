@@ -5,6 +5,7 @@ namespace app\home\controller;
 use app\BaseController;
 use app\common\service\OnlineUserService;
 use app\home\model\UserModel;
+use SnowflakeClass;
 use think\exception\HttpResponseException;
 
 class Base extends BaseController
@@ -17,7 +18,8 @@ class Base extends BaseController
     protected $noLimitApi = [
         'Lottery' => ['getLotteryNow'],
     ];
-
+    // 关联组id
+    protected $fb_id;
     protected function initialize()
     {
         // 用户登录信息
@@ -32,6 +34,7 @@ class Base extends BaseController
 //        }
         // 设置用户上线
         OnlineUserService::online($this->userInfo['id'], $this->userInfo['admin_id']);
+        $this->fb_id = (new SnowflakeClass(0, 0))->nextId();
     }
 
     // 访问频率限制

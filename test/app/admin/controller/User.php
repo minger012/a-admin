@@ -235,8 +235,8 @@ class User extends Base
                 'create_time' => time(),
             ]);
             //添加资金
-            Db::table('user')->
-            where('id', $userInfo['id'])
+            Db::table('user')
+                ->where('id', $userInfo['id'])
                 ->inc('money', $params['money'])
                 ->update();
             //添加流水
@@ -405,39 +405,6 @@ class User extends Base
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e);
-        }
-    }
-
-
-    //获取在线用户列表
-    public function onlineUserList()
-    {
-        try {
-            // 获取参数
-            $input = request()->getContent();
-            $params = json_decode($input, true) ?: [];
-
-            // 获取在线用户列表
-            $adminId = $this->isSuperAdmin() ? 0 : $this->adminInfo['id'];
-            $onlineUsers = OnlineUserService::getOnlineUserList($adminId);
-
-            // 获取用户详细信息
-            if (!empty($onlineUsers)) {
-                $where = [];
-                if (!empty($params['username'])) {
-                    $where[] = ['username', '=', $params['username']];
-                }
-                $userIds = array_column($onlineUsers, 'uid');
-                $onlineUsers = Db::name('user')
-                    ->where($where)
-                    ->whereIn('id', $userIds)
-                    ->withoutField('password')
-                    ->select();
-            }
-
-            return apiSuccess('success', ['list' => $onlineUsers, 'total' => count($onlineUsers)]);
-        } catch (\Exception $e) {
-            return apiError($e->getMessage());
         }
     }
 }

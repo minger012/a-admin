@@ -58,8 +58,8 @@ class Coupon extends Base
                 return apiError('请输入固定金额');
             }
         } else {
-            if (!$params['min'] || !$params['max']) {
-                return apiError('请输入金额范围');
+            if (!$params['discount']) {
+                return apiError('请输入折扣百分比');
             }
         }
         if ($params['expir_type'] == 1) {

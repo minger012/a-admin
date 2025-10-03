@@ -17,7 +17,8 @@ return [
     'user_invitation_error' => '授权码错误',
     'user_impose' => '你被限制下单',
     'money_error' => '余额不足',
-    'order_success' => '下单成功',
+    'order_success' => '投放成功',
+    'order_error' => '投放失败',
     'order_impose' => '限制下单',
     'order_seal' => '本期已封单',
     'withdraw_min' => '提现最低金额为%s',
@@ -27,6 +28,7 @@ return [
     'withdraw_impose' => '限制提现，请联系客服',
     'recharge_impose' => '此账号被限制充值',
     'coupon_time_error' => '该优惠券不在使用时间',
+    'coupon_money_error' => '金额范围在%s至%s',
     'coupon_is_use' => '该优惠券已使用',
     'coupon_error' => '该优惠券不可使用',
 

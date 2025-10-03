@@ -320,7 +320,7 @@ class User extends Base
             $paginator = Db::table('user_coupon')
                 ->alias('a')
                 ->join('coupon b','a.cid=b.id')
-                ->field('a.*,b.name,b.type,b.discount,b.discount_amount')
+                ->field('a.*,b.name,b.intro,b.type,b.discount,b.discount_amount')
                 ->where($where)
                 ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
