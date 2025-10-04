@@ -52,7 +52,7 @@ class Config extends Base
         $input = request()->getContent();
         $params = json_decode($input, true);
         try {
-            foreach ($params['arr'] as $v) {
+            foreach ($params['config'] as $v) {
                 $value = $v['value'];
                 if (!in_array($v['id'], ConfigModel::$strId)) {
                     $value = jsonEncode($v['value']);

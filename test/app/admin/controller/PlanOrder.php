@@ -83,7 +83,11 @@ class PlanOrder extends Base
         try {
             // 开始事务
             Db::startTrans();
-            $planOrder = Db::name('plan_order')->where(['id' => $params['id']])->find();
+            $where = [['id', '=', $params['id']]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
+            }
+            $planOrder = Db::name('plan_order')->where($where)->find();
             if (!$planOrder) {
                 throw new \Exception(lang('non_existent'));
             }
@@ -98,6 +102,8 @@ class PlanOrder extends Base
                     throw new \Exception(lang('params_error'));
                 }
                 if ($params['state'] == PlanOrderModel::state_3) {// 失败退回
+                    // 添加资金
+                    Db::table('user')->where('id', $planOrder['uid'])->inc('money', $planOrder['actual_money'])->update();
                     // 添加流水
                     Db::table('flow')->insert([
                         'uid' => $planOrder['uid'],
@@ -105,17 +111,34 @@ class PlanOrder extends Base
                         'admin_id' => $planOrder['admin_id'],
                         'before' => $userInfo['money'],
                         'after' => $userInfo['money'] + $planOrder['actual_money'],
-                        'cha' => -$actual_money,
+                        'cha' => $planOrder['actual_money'],
                         'fb_id' => $this->fb_id,
-                        'order_no' => $order_no,
                         'update_time' => time(),
                         'create_time' => time(),
                     ]);
+                    // 优惠券退回
+                    if (!empty($planOrder['cid'])) {
+                        Db::table('user_coupon')->where('id', $planOrder['cid'])->update(['use_time' => 0]);
+                    }
                 }
             } elseif ($planOrder == PlanOrderModel::state_4) {// 结算中
                 if (!in_array($params['state'], [PlanOrderModel::state_5])) {
                     throw new \Exception(lang('params_error'));
                 }
+                // 添加资金
+                Db::table('user')->where('id', $planOrder['uid'])->inc('money', $planOrder['profit'] + $planOrder['money'])->update();
+                // 添加流水
+                Db::table('flow')->insert([
+                    'uid' => $planOrder['uid'],
+                    'type' => FlowModel::type_3,
+                    'admin_id' => $planOrder['admin_id'],
+                    'before' => $userInfo['money'],
+                    'after' => $userInfo['money'] + $planOrder['profit'] + $planOrder['money'],
+                    'cha' => $planOrder['profit'] + $planOrder['money'],
+                    'fb_id' => $this->fb_id,
+                    'update_time' => time(),
+                    'create_time' => time(),
+                ]);
             } else {
                 throw new \Exception(lang('params_error'));
             }
