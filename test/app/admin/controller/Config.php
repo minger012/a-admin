@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\common\model\ConfigModel;
 use app\common\validate\CommonValidate;
 use think\facade\Db;
 
@@ -24,24 +25,14 @@ class Config extends Base
                 ]);
             $list = $paginator->items();
             if (empty($list)) {
-                $list = [
-                    ['id' => 1, 'title' => '货币符号', 'content' => ''],
-                    ['id' => 2, 'title' => '货币代码', 'content' => ''],
-                    ['id' => 3, 'title' => '客服链接', 'content' => ''],
-                    ['id' => 4, 'title' => '充值客服链接', 'content' => ''],
-                    ['id' => 5, 'title' => '店铺星级配置', 'content' => ''],
-                    ['id' => 6, 'title' => '店铺星级多语言映射配置', 'content' => ''],
-                    ['id' => 7, 'title' => '常见问题配置', 'content' => ''],
-                    ['id' => 8, 'title' => '服务条款', 'content' => ''],
-                    ['id' => 9, 'title' => '广告中心Banner配置', 'content' => ''],
-                ];
+                $list = ConfigModel::$init;
                 Db::table('config')->insertAll($list);
             }
             foreach ($list as $k => $v) {
-                if (in_array($v['id'], [1, 2])) {
+                if (in_array($v['id'], ConfigModel::$strId)) {
                     continue;
                 }
-                $list[$k]['content'] = json_decode(base64_decode($v['content']), true) ?? [];
+                $list[$k]['content'] = jsonDecode($v['content']);
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -63,8 +54,8 @@ class Config extends Base
         try {
             foreach ($params['arr'] as $v) {
                 $value = $v['value'];
-                if (!in_array($v['id'], [1, 2])) {
-                    $value = base64_encode(json_encode($v['value'], JSON_UNESCAPED_UNICODE)) ?? '';
+                if (!in_array($v['id'], ConfigModel::$strId)) {
+                    $value = jsonEncode($v['value']);
                 }
                 $updateData = ['value' => $value];
                 Db::name('config')

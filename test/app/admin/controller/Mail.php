@@ -76,10 +76,10 @@ class Mail extends Base
                 $where[] = ['admin_id', '=', $this->adminInfo['id']];
             }
             if ($params['sendType'] == 2) {// 发指定
-                if (empty($uidArr)) {
+                if (empty($params['uids'])) {
                     return apiError('uid 有误');
                 }
-                $where[] = ['id', 'in', implode(',', $uidArr)];
+                $where[] = ['id', 'in', implode(',', $params['uids'])];
             }
             $uidArr = Db::table('user')->where($where)->field('id,admin_id')->select()->toArray();
             if (empty($uidArr)) {
@@ -93,6 +93,7 @@ class Mail extends Base
                     'content' => $params['content'],
                     'type' => $params['type'],
                     'admin_id' => $value['admin_id'],
+                    'update_time' => time(),
                     'create_time' => time(),
                 ];
             }

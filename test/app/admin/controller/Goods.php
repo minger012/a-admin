@@ -9,7 +9,7 @@ use think\facade\Db;
 class Goods extends Base
 {
     // json字段
-    protected $jsonField = ['app_info'];
+    protected $jsonField = ['app_info', 'image'];
 
     public function list()
     {
@@ -38,7 +38,7 @@ class Goods extends Base
             // 字段转化
             foreach ($list as $key => $value) {
                 foreach ($this->jsonField as $field) {
-                    $list[$key][$field] = !empty($value[$field]) ? json_decode(base64_decode($value[$field]), true) : [];
+                    $list[$key][$field] = jsonDecode($value[$field]);
                 }
             }
             $res = [
@@ -63,7 +63,7 @@ class Goods extends Base
             return apiError($validate->getError());
         }
         foreach ($this->jsonField as $field) {
-            $params[$field] = !empty($params[$field]) ? base64_encode(json_encode($params[$field], JSON_UNESCAPED_UNICODE)) : '';
+            $params[$field] = jsonEncode($params[$field]);
         }
         $params['update_time'] = time();
         $params['create_time'] = time();
@@ -85,7 +85,7 @@ class Goods extends Base
                 return apiError('non_existent');
             }
             foreach ($this->jsonField as $field) {
-                $params[$field] = !empty($params[$field]) ? base64_encode(json_encode($params[$field], JSON_UNESCAPED_UNICODE)) : '';
+                $params[$field] = jsonEncode($params[$field]);
             }
             $params['update_time'] = time();
             Db::name('goods')

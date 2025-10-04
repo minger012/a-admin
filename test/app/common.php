@@ -55,6 +55,24 @@ function checkPassword($password, $md5Password)
     }
 }
 
+// json 转 数组
+function jsonDecode($str)
+{
+    if (empty($str)) {
+        return [];
+    }
+    return json_decode(base64_decode($str), true) ?? [];
+}
+
+// 数组 转 json
+function jsonEncode($arr)
+{
+    if (empty($arr) || !is_array($arr)) {
+        $arr = [];
+    }
+    return base64_encode(json_encode($arr, JSON_UNESCAPED_UNICODE));
+}
+
 //随机字符
 function getRandomCode($num)
 {

@@ -10,6 +10,8 @@ use think\facade\Db;
 
 class PlanOrder extends Base
 {
+    // json字段
+    protected $jsonField = ['content', 'orienteering', 'rule'];
     public function list()
     {
         $input = request()->getContent();
@@ -18,20 +20,28 @@ class PlanOrder extends Base
         if (!$validate->check($params, $validate->page_rule)) {
             return apiError($validate->getError());
         }
+        $where = [['a.uid', '=', $this->userInfo['id']]];
+        if (in_array($params['type'], [1, 2, 3, 4])) {
+            $where[] = ['a.state', '=', $params['type'] - 1];
+        } elseif ($params['type'] == 5) {
+            $where[] = ['a.state', 'in', '4,5'];
+        }
         try {
-            $paginator = Db::table('plan')
+            $paginator = Db::table('plan_order')
                 ->alias('a')
-                ->join('goods b', 'a.goods_id = b.id')
-                ->field('a.*,b.company')
+                ->join('plan b', 'a.plan_id = b.id')
+                ->join('goods c', 'a.goods_id = b.id')
+                ->where($where)
+                ->field('a.*,b.image,c.logo as goods_logo,c.type_name,c.intro as goods_intro')
                 ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
                     'page' => $params['page'] ?? 1,     // 当前页码
                 ]);
             $list = $paginator->items();
-            // 字段转化
             foreach ($list as $key => $value) {
-
+                $list[$key]['image'] = getDomain() . $value['image'];
+                $list[$key]['goods_logo'] = getDomain() . $value['goods_logo'];
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -137,6 +147,9 @@ class PlanOrder extends Base
                 'form' => 1,
                 'cd' => $params['cd'],
                 'money' => $params['money'],
+                'min' => $params['money'],
+                'max' => $params['money'],
+                'cid' => $params['cid'],
                 'actual_money' => $actual_money,
                 'state' => PlanOrderModel::state_1,
                 'update_time' => time(),
@@ -169,6 +182,7 @@ class PlanOrder extends Base
         }
     }
 
+    // 详情
     public function detail()
     {
         $input = request()->getContent();
@@ -178,17 +192,23 @@ class PlanOrder extends Base
             return apiError($validate->getError());
         }
         try {
-            $planData = Db::table('plan')
-                ->where('a.id', $params['id'])
+            $planOrderDetail = Db::table('plan_order')
                 ->alias('a')
-                ->join('goods b', 'a.goods_id = b.id')
-                ->field('a.*,b.company,b.type_name,b.logo as goods_logo ,b.image as goods_image,b.google_play,b.app_store,b.app_info')
+                ->join('plan b', 'a.plan_id = b.id')
+                ->join('goods c', 'a.goods_id = b.id')
+                ->where('a.id', $params['id'])
+                ->where('a.uid', $this->userInfo['id'])
+                ->field('a.*,b.image,b.intro,b.content,b.orienteering,b.rule,c.logo as goods_logo,c.type_name,c.company as goods_company')
                 ->find();
-            $planData['money'] = Db::table('user')->where('id', $this->userInfo['id'])->value('money');
-            $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
-            $planData['goods_image'] = getDomain() . $planData['goods_image'];
-            $planData['app_info'] = !empty($planData['app_info']) ? json_decode(base64_decode($planData['app_info']), true) : [];
-            return apiSuccess('success', $planData);
+            if (empty($planOrderDetail)) {
+                return apiError('non_existent');
+            }
+            $planOrderDetail['image'] = getDomain() . $planOrderDetail['image'];
+            $planOrderDetail['goods_logo'] = getDomain() . $planOrderDetail['goods_logo'];
+            foreach ($this->jsonField as $field) {
+                $planOrderDetail[$field] = jsonDecode($planOrderDetail[$field]);
+            }
+            return apiSuccess('success', $planOrderDetail);
         } catch (\Exception $e) {
             return apiError($e);
         }

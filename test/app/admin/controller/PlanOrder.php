@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\admin\validate\PlanOrderValidate;
+use app\common\model\FlowModel;
 use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
 use think\facade\Db;
@@ -80,16 +81,54 @@ class PlanOrder extends Base
             return apiError($validate->getError());
         }
         try {
-            $res = Db::name('plan')->where(['id' => $params['id']])->find();
-            if (!$res) {
-                return apiError('non_existent');
+            // 开始事务
+            Db::startTrans();
+            $planOrder = Db::name('plan_order')->where(['id' => $params['id']])->find();
+            if (!$planOrder) {
+                throw new \Exception(lang('non_existent'));
+            }
+            // 判断余额
+            $userInfo = Db::name('user')
+                ->where('id', $planOrder['uid'])
+                ->lock(true)
+                ->field('money')
+                ->find();
+            if ($planOrder == PlanOrderModel::state_1) {// 匹配中
+                if (!in_array($params['state'], [PlanOrderModel::state_2, PlanOrderModel::state_3])) {
+                    throw new \Exception(lang('params_error'));
+                }
+                if ($params['state'] == PlanOrderModel::state_3) {// 失败退回
+                    // 添加流水
+                    Db::table('flow')->insert([
+                        'uid' => $planOrder['uid'],
+                        'type' => FlowModel::type_6,
+                        'admin_id' => $planOrder['admin_id'],
+                        'before' => $userInfo['money'],
+                        'after' => $userInfo['money'] + $planOrder['actual_money'],
+                        'cha' => -$actual_money,
+                        'fb_id' => $this->fb_id,
+                        'order_no' => $order_no,
+                        'update_time' => time(),
+                        'create_time' => time(),
+                    ]);
+                }
+            } elseif ($planOrder == PlanOrderModel::state_4) {// 结算中
+                if (!in_array($params['state'], [PlanOrderModel::state_5])) {
+                    throw new \Exception(lang('params_error'));
+                }
+            } else {
+                throw new \Exception(lang('params_error'));
             }
             $params['update_time'] = time();
             Db::name('plan')
                 ->where(['id' => $params['id']])
                 ->update($params);
+            // 提交事务
+            Db::commit();
             return apiSuccess();
         } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
             return apiError($e);
         }
     }

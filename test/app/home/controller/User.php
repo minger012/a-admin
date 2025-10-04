@@ -4,6 +4,7 @@ namespace app\home\controller;
 
 use app\common\model\ConfigModel;
 use app\common\model\FlowModel;
+use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
 use app\home\model\UserModel;
 use app\home\validate\UserValidate;
@@ -45,27 +46,38 @@ class User extends Base
         return apiSuccess();
     }
 
-    //添加银行卡
+    // 添加银行卡
     public function bankCardAdd()
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
         $validate = new UserValidate();
-        $params['uid'] = $this->userInfo['id'];
         if (!$validate->check($params, $validate->bank_car_rule)) {
             return apiError($validate->getError());
         }
-        $name = Db::table('user')->where('id', $this->userInfo['id'])->value('name');
-        if (empty($name)) {
-            Db::table('user')->where('id', $this->userInfo['id'])->update(['name' => $params['name']]);
+        try {
+            $id = Db::name('bank_card')->where('uid', $this->userInfo['id'])->value('id');
+            if (!empty($id)) {
+                Db::name('bank_card')->where('uid', $this->userInfo['id'])->update($params);
+            } else {
+                $params['uid'] = $this->userInfo['id'];
+                $params['create_time'] = time();
+                Db::name('bank_card')->insert($params);
+            }
+            return apiSuccess('success');
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
         }
-        $params['password'] = getMd5Password($params['password']);
-        $params['create_time'] = time();
-        $res = Db::name('bank_card')->insert($params);
-        if ($res) {
-            return apiSuccess();
-        } else {
-            return apiError();
+    }
+
+    // 获取银行卡
+    public function bankCardList()
+    {
+        try {
+            $bankCard = Db::name('bank_card')->where('uid', $this->userInfo['id'])->find();
+            return apiSuccess('success', $bankCard);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
         }
     }
 
@@ -112,7 +124,7 @@ class User extends Base
     }
 
     //提现
-    public function withdraw(ConfigModel $model)
+    public function withdraw()
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
@@ -123,67 +135,49 @@ class User extends Base
         try {
             // 开始事务
             Db::startTrans();
-            $cardInfo = Db::name('bank_card')->where('id', $params['card_id'])->find();
-            if ($cardInfo['password'] !== getMd5Password($params['password'])) {
-                throw new \Exception(lang('password_error'));
-            }
-            // 提现最低金额
-            $withdrawMin = $model->getConfigValue($model::id_2);
-            if (!empty($withdrawMin) && $withdrawMin > $params['money']) {
-                throw new \Exception(vsprintf(lang('withdraw_min'), [$withdrawMin]));
-            }
-            // 提现每日限制
-            $dayNum = $model->getConfigValue($model::id_3);
-            if (!empty($dayNum)) {
-                $todayNum = Db::name('withdraw')
-                    ->where('create_time', '>=', strtotime('today'))
-                    ->where('uid', $this->userInfo['id'])
-                    ->value('count(id)');
-                if ($todayNum >= $dayNum) {
-                    throw new \Exception(vsprintf(lang('withdraw_num'), [$dayNum]));
-                }
+            $cardInfo = Db::name('bank_card')->where('id', $this->userInfo['id'])->find();
+            if (empty($cardInfo)) {
+                throw new \Exception(lang('bank_error'));
             }
             // 判断余额
             $userInfo = Db::name('user')
-                ->where('username', $this->userInfo['username'])
+                ->where('id', $this->userInfo['id'])
                 ->lock(true)
-                ->field('money,withdraw_limit,state')
+                ->field('money,pay_password')
                 ->find();
-            if ($userInfo['state'] == UserModel::STATE_4) {
-                throw new \Exception(lang('withdraw_impose'));
+            if ($userInfo['pay_password'] !== getMd5Password($params['password'])) {
+                throw new \Exception(lang('password_error'));
             }
             if ($params['money'] > $userInfo['money']) {
                 throw new \Exception(lang('money_error'));
             }
-            if ($params['money'] > $userInfo['withdraw_limit']) {
-                throw new \Exception(vsprintf(lang('withdraw_limit'), [$userInfo['withdraw_limit']]));
-            }
             // 插入提现表
-            unset($params['password'], $params['card_id']);
             $params['uid'] = $this->userInfo['id'];
             $params['admin_id'] = $this->userInfo['admin_id'];
-            $params['username'] = $this->userInfo['username'];
-            $params['name'] = $cardInfo['name'];
-            $params['card'] = $cardInfo['cardno'];
-            $params['bank'] = $cardInfo['bank'];
-            $params['before_money'] = $userInfo['money'];
-            $params['type'] = 2;
+            $params['fb_id'] = $this->fb_id;
+            $params['methods'] = $cardInfo['methods'];
+            $params['currency'] = $cardInfo['currency'];
+            $params['address'] = $cardInfo['address'];
             $params['state'] = 0;
+            $params['update_time'] = time();
             $params['create_time'] = time();
+            unset($params['password']);
             Db::name('withdraw')->insert($params);
-            //扣除资金
+            // 扣除资金
             Db::table('user')->where('id', $this->userInfo['id'])
                 ->dec('money', $params['money'])
-                ->dec('withdraw_limit', $params['money'])
                 ->inc('freeze_money', $params['money'])
                 ->update();
-            //插入流水
+            // 插入流水
             Db::table('flow')->insert([
                 'uid' => $this->userInfo['id'],
-                'type' => FlowModel::type_4,
+                'type' => FlowModel::type_2,
+                'admin_id' => $this->userInfo['admin_id'],
                 'before' => $userInfo['money'],
                 'after' => $userInfo['money'] - $params['money'],
                 'cha' => -$params['money'],
+                'fb_id' => $this->fb_id,
+                'update_time' => time(),
                 'create_time' => time(),
             ]);
             // 提交事务
@@ -243,23 +237,7 @@ class User extends Base
         }
     }
 
-    public function bankCardDel()
-    {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new CommonValidate();
-        if (!$validate->check($params, $validate->id_rule)) {
-            return apiError($validate->getError());
-        }
-        try {
-            Db::name('bank_card')->where(['id' => $params['id']])->delete();
-            return apiSuccess();
-        } catch (\Exception $e) {
-            return apiError($e->getMessage());
-        }
-    }
-
-    //设置密码
+    // 设置密码
     public function setPassWord(UserModel $model)
     {
         $input = request()->getContent();
@@ -269,14 +247,42 @@ class User extends Base
             return apiError($validate->getError());
         }
         try {
-            $uif = $model::where(['username' => $this->userInfo['username']])
+            $uif = $model::where(['id' => $this->userInfo['id']])
                 ->field('password')
                 ->find()->toArray();
-            if ($uif['password'] !== getMd5Password($params['orpassword'])) {
-                throw new \Exception(lang('password_error'));
+            if (!empty($uif['password'])) {
+                if ($uif['password'] !== getMd5Password($params['orpassword'])) {
+                    throw new \Exception(lang('password_error'));
+                }
             }
-            $model::where(['username' => $this->userInfo['username']])
+            $model::where(['id' => $this->userInfo['id']])
                 ->update(['password' => getMd5Password($params['password'])]);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    // 设置交易密码
+    public function setPayPassWord(UserModel $model)
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new UserValidate();
+        if (!$validate->check($params, $validate->set_password_rule)) {
+            return apiError($validate->getError());
+        }
+        try {
+            $uif = $model::where(['id' => $this->userInfo['id']])
+                ->field('pay_password')
+                ->find()->toArray();
+            if (!empty($uif['pay_password'])) {
+                if ($uif['pay_password'] !== getMd5Password($params['orpassword'])) {
+                    throw new \Exception(lang('password_error'));
+                }
+            }
+            $model::where(['id' => $this->userInfo['id']])
+                ->update(['pay_password' => getMd5Password($params['password'])]);
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e->getMessage());
@@ -288,13 +294,13 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('sign_time')
+                ->field('sign_time,sign')
                 ->find()->toArray();
             if (isToday($uif['sign_time'])) {
                 throw new \Exception(lang('已签到'));
             }
             $model::where(['id' => $this->userInfo['id']])
-                ->update(['sign_time' => time()]);
+                ->update(['sign_time' => time(), 'sign' => $uif['sign'] + 1]);
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e->getMessage());
@@ -319,7 +325,7 @@ class User extends Base
             }
             $paginator = Db::table('user_coupon')
                 ->alias('a')
-                ->join('coupon b','a.cid=b.id')
+                ->join('coupon b', 'a.cid=b.id')
                 ->field('a.*,b.name,b.intro,b.type,b.discount,b.discount_amount')
                 ->where($where)
                 ->order('a.id', 'desc')// 按ID倒序（可选）
@@ -352,4 +358,99 @@ class User extends Base
         }
     }
 
+    // 邮件列表
+    public function mailList()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new CommonValidate();
+        if (!$validate->append('state', 'require|in:0,1,2')
+            ->append('type', 'require|in:0,1,2,3')
+            ->check($params, $validate->page_rule)
+        ) {
+            return apiError($validate->getError());
+        }
+        try {
+            $where = [['uid', '=', $this->userInfo['id']]];
+            if ($params['type'] != 0) {
+                $where[] = ['type', '=', $params['type']];
+            }
+            if ($params['state'] == 1) {
+                $where[] = [['read_time', '=', 0]];
+            } elseif ($params['state'] == 2) {
+                $where[] = [['read_time', '!=', 0]];
+            }
+            $paginator = Db::table('user_mail')
+                ->where($where)
+                ->order('id', 'desc')// 按ID倒序（可选）
+                ->paginate([
+                    'list_rows' => $params['pageSize'] ?? 100, // 每页记录数
+                    'page' => $params['page'] ?? 1,     // 当前页码
+                ]);
+            $list = $paginator->items();
+            $res = [
+                'list' => $list,       // 当前页数据
+                'total' => $paginator->total(),       // 总记录数
+                'page' => $paginator->currentPage(), // 当前页码
+                'page_size' => $paginator->listRows(),    // 每页记录数
+                'total_page' => $paginator->lastPage(),    // 总页数
+            ];
+            return apiSuccess('success', $res);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    // 签到
+    public function mailRead()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new CommonValidate();
+        if (!$validate->check($params, $validate->id_rule)) {
+            return apiError($validate->getError());
+        }
+        try {
+            Db::table('user_mail')
+                ->where('id', $params['id'])
+                ->update(['read_time' => time()]);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    // 钱包
+    public function wallet(UserModel $model, ConfigModel $configModel)
+    {
+        try {
+            $uif = $model::where(['id' => $this->userInfo['id']])
+                ->field('money,pay_password')
+                ->find()->toArray();
+
+            $wait_putIn = Db::table('plan_order')
+                ->where([
+                    ['uid', '=', $this->userInfo['id']],
+                    ['state', '=', PlanOrderModel::state_2],
+                ])
+                ->value('count(wait_putIn)');
+            $wait_money = Db::table('plan_order')
+                ->where([
+                    ['uid', '=', $this->userInfo['id']],
+                    ['state', '=', PlanOrderModel::state_4],
+                ])
+                ->value('count(money)');
+            $cardInfo = Db::name('bank_card')->where('uid', $this->userInfo['id'])->find();
+            return apiSuccess('success', [
+                'money' => $uif['money'],
+                're_service_address' => $configModel->getConfigValue(4, $this->userInfo['id']),
+                'set_pay_password' => $uif['pay_password'] ? 1 : 0,
+                'wait_putIn' => $wait_putIn,
+                'wait_money' => $wait_money,
+                'set_card' => !empty($cardInfo) ? 1 : 0,
+            ]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
 }

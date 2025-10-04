@@ -37,10 +37,9 @@ class UserValidate extends Validate
     ];
 
     public $bank_car_rule = [
-        'cardno' => 'require|alphaNum|unique:bank_card,cardno^uid',
-        'password' => 'require|length:6,32',
-        'name' => 'require|regex:/^[\w\x{4e00}-\x{9fa5}\s]+$/u',
-        'bank' => 'require|regex:/^[\w\x{4e00}-\x{9fa5}\s()]+$/u',
+        'address' => 'require|alphaNum',
+        'methods' => 'require|alphaNum',
+        'currency' => 'require|alphaNum',
     ];
     public $bank_car_edit_rule = [
         'cardno' => 'require|alphaNum|unique:bank_card,cardno^uid',
@@ -49,7 +48,7 @@ class UserValidate extends Validate
         'bank' => 'require|regex:/^[\w\x{4e00}-\x{9fa5}\s()]+$/u',
     ];
     public $set_password_rule = [
-        'orpassword' => 'require|length:6,32',
+        'orpassword' => 'length:6,32',
         'password' => 'require|length:6,32',
         'repassword' => 'require|confirm:password',
     ];
@@ -57,7 +56,6 @@ class UserValidate extends Validate
     public $withdraw_rule = [
         'money' => 'require|integer|gt:0',
         'password' => 'require',
-        'card_id' => 'require|integer|gt:0',
     ];
 
     public $user_add_rule = [

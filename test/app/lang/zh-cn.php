@@ -31,6 +31,8 @@ return [
     'coupon_money_error' => '金额范围在%s至%s',
     'coupon_is_use' => '该优惠券已使用',
     'coupon_error' => '该优惠券不可使用',
+    'bank_error' => '请先绑定提现方式',
+
 
     /******字段翻译********/
     'username' => '账户',

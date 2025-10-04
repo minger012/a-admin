@@ -16,7 +16,10 @@ class Index extends Base
         if (!$validate->check($params, $validate->time_id)) {
             return apiError($validate->getError());
         }
-        $where = [['uid', '=', $this->userInfo['id']]];
+        $where = [
+            ['uid', '=', $this->userInfo['id']],
+            ['state', 'in', '2,4,5'],
+        ];
         if ($params['id'] == 0) {
             $where[] = ['create_time', '>=', TimeClass::getTodayStart()];
         } elseif ($params['id'] == 1) {
