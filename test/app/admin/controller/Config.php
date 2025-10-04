@@ -32,7 +32,7 @@ class Config extends Base
                 if (in_array($v['id'], ConfigModel::$strId)) {
                     continue;
                 }
-                $list[$k]['content'] = jsonDecode($v['content']);
+                $list[$k]['value'] = jsonDecode($v['value']);
             }
             $res = [
                 'list' => $list,       // 当前页数据
