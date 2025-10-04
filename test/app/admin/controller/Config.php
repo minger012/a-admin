@@ -53,9 +53,9 @@ class Config extends Base
         $params = json_decode($input, true);
         try {
             foreach ($params['config'] as $v) {
-                $value = $v['value'];
+                $value = $v['content'];
                 if (!in_array($v['id'], ConfigModel::$strId)) {
-                    $value = jsonEncode($v['value']);
+                    $value = jsonEncode($v['content']);
                 }
                 $updateData = ['value' => $value];
                 Db::name('config')
