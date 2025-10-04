@@ -109,8 +109,8 @@ function generateOrderNo()
 function getDomain()
 {
     return Request::scheme() . '://' .
-        Request::host() .
-        (in_array(Request::port(), [80, 443]) ? '' : ':' . Request::port());
+        Request::host() ;
+//        (in_array(Request::port(), [80, 443]) ? '' : ':' . Request::port());
 }
 
 // 过滤字符串

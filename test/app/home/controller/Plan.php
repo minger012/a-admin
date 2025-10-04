@@ -61,7 +61,7 @@ class Plan extends Base
             $planData['money'] = Db::table('user')->where('id', $this->userInfo['id'])->value('money');
             $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
             $planData['goods_image'] = getDomain() . $planData['goods_image'];
-            $planData['app_info'] = !empty($planData['app_info']) ? json_decode(base64_decode($planData['app_info']), true) : [];
+            $planData['app_info'] = jsonDecode($planData['app_info']);
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {
             return apiError($e);
