@@ -347,6 +347,7 @@ class User extends Base
             }
             $update['uid'] = $params['id'];
             $update['cid'] = $params['cid'];
+            $update['fb_id'] = $this->fb_id;
             if ($res['expir_type'] == 1) {
                 $update['start_time'] = time();
                 $update['end_time'] = time() + $res['expir_day'];

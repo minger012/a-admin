@@ -1,4 +1,5 @@
 <?php
+
 use think\facade\Request;
 
 /**
@@ -106,11 +107,24 @@ function generateOrderNo()
     return date('YmdHis') . str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
 }
 
+// 获取当前域名
 function getDomain()
 {
     return Request::scheme() . '://' .
-        Request::host() ;
+        Request::host();
 //        (in_array(Request::port(), [80, 443]) ? '' : ':' . Request::port());
+}
+
+// 文件地址拼接
+function fileDomain($image)
+{
+    if (empty($image)) {
+        return '';
+    }
+    if (strpos($image, 'http') !== false) {
+        return $image;
+    }
+    return getDomain() . $image;
 }
 
 // 过滤字符串
@@ -121,7 +135,8 @@ function filtrationStr($str)
 }
 
 // 时间戳 + 随机数
-function generateShortId() {
+function generateShortId()
+{
     $timePart = time() % 100000; // 取时间戳的后5位
     $randomPart = mt_rand(1000, 9999); // 4位随机数
     return (int)($timePart . $randomPart);

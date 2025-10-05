@@ -148,6 +148,7 @@ class PlanOrder extends Base
                 'form' => 1,
                 'cd' => $params['cd'],
                 'money' => $params['money'],
+                'wait_putIn' => $params['wait_putIn'],
                 'min' => $params['money'],
                 'max' => $params['money'],
                 'cid' => $params['cid'],

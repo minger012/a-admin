@@ -452,4 +452,23 @@ class User extends Base
             return apiError($e->getMessage());
         }
     }
+
+    public function uploadImage(UserModel $model)
+    {
+        // 获取表单上传文件
+        $file = request()->file('image');
+        if (empty($file)) {
+            return apiError('params_error');
+        }
+        try {
+            validate(['image' => 'fileSize:10240|fileExt:jpg|image:200,200,jpg'])->check([$file]);
+            $savename = \think\facade\Filesystem::putFile('/upload/image', $file);
+            $url = '/' . $savename;
+            $model::where(['id' => $this->userInfo['id']])
+                ->update(['image' => $url]);
+            return apiSuccess('success', ['url' => fileDomain($url)]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
 }
