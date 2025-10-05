@@ -1,0 +1,1 @@
+import{bi as m,dX as d,O as s,dY as i}from"./index-FB6W5mBG.js";function c(){const n=m(d,null);return s(()=>{if(n===null)return i;const{mergedThemeRef:{value:r},mergedThemeOverridesRef:{value:e}}=n,o=(r==null?void 0:r.common)||i;return e!=null&&e.common?Object.assign({},o,e.common):o})}export{c as u};
