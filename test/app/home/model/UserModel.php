@@ -49,12 +49,16 @@ class UserModel extends Model
                 'password' => $password,
                 'TimeClass' => time()
             ]), self::$_token_secretKey);
+            // 是否有设置收款
+            $cardId = Db::name('bank_card')->where('uid', $user['id'])->value('id');
             // 返回数据
             $data = [
                 'id' => $user['id'],
                 'last_login_time' => $user['last_login_time'],
                 'last_login_ip' => $user['last_login_ip'],
                 'lang' => $user['lang'] ?? config('lang.default_lang'),
+                'set_pay_password' => $user['pay_password'] ? 1 : 0,// 是否有设置支付密码
+                'set_card' => !empty($cardId) ? 1 : 0,
                 'username' => $username,
                 'name' => $user['name'],
                 'admin_id' => $user['admin_id'],

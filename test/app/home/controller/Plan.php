@@ -19,7 +19,7 @@ class Plan extends Base
             $paginator = Db::table('plan')
                 ->alias('a')
                 ->join('goods b', 'a.goods_id = b.id')
-                ->field('a.*,b.company')
+                ->field('a.id,a.name,a.image,a.intro,a.create_time,b.company')
                 ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
@@ -28,7 +28,7 @@ class Plan extends Base
             $list = $paginator->items();
             // 字段转化
             foreach ($list as $key => $value) {
-
+                $list[$key]['image'] = getDomain() . $value['image'];
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -56,11 +56,10 @@ class Plan extends Base
                 ->where('a.id', $params['id'])
                 ->alias('a')
                 ->join('goods b', 'a.goods_id = b.id')
-                ->field('a.*,b.company,b.type_name,b.logo as goods_logo ,b.image as goods_image,b.google_play,b.app_store,b.app_info')
+                ->field('a.id,a.name,a.image,a.intro,a.create_time,b.company,b.type_name,b.logo as goods_logo,b.google_play,b.app_store,b.app_info')
                 ->find();
-            $planData['money'] = Db::table('user')->where('id', $this->userInfo['id'])->value('money');
             $planData['goods_logo'] = getDomain() . $planData['goods_logo'];
-            $planData['goods_image'] = getDomain() . $planData['goods_image'];
+            $planData['image'] = getDomain() . $planData['image'];
             $planData['app_info'] = jsonDecode($planData['app_info']);
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {

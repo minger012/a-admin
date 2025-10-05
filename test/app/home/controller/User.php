@@ -425,7 +425,7 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('money,pay_password')
+                ->field('money')
                 ->find()->toArray();
 
             $wait_putIn = Db::table('plan_order')
@@ -440,14 +440,13 @@ class User extends Base
                     ['state', '=', PlanOrderModel::state_4],
                 ])
                 ->value('count(money)');
-            $cardInfo = Db::name('bank_card')->where('uid', $this->userInfo['id'])->find();
+
             return apiSuccess('success', [
                 'money' => $uif['money'],
                 're_service_address' => $configModel->getConfigValue(4, $this->userInfo['id']),
-                'set_pay_password' => $uif['pay_password'] ? 1 : 0,
                 'wait_putIn' => $wait_putIn,
                 'wait_money' => $wait_money,
-                'set_card' => !empty($cardInfo) ? 1 : 0,
+
             ]);
         } catch (\Exception $e) {
             return apiError($e->getMessage());
