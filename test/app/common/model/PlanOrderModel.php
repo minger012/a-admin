@@ -2,7 +2,6 @@
 
 namespace app\common\model;
 
-use think\facade\Db;
 use think\Model;
 
 class PlanOrderModel extends Model
@@ -73,9 +72,14 @@ class PlanOrderModel extends Model
         // 计算利润（根据你的业务逻辑调整）
         $profit = $this->calculateProfit($order, $schedule);
 
+        // 计算待投放
+        $wait_putIn = round($order['money'] * ($schedule / 100), 2);
+
         // 更新数据
         $updateData = [
             'schedule' => round($schedule, 2),
+            'wait_putIn' => $wait_putIn,
+            'putIn' => $order['money'] - $wait_putIn,
             'profit' => $profit,
             'update_time' => $currentTime
         ];

@@ -146,7 +146,7 @@ class PlanOrder extends Base
                 'order_no' => $order_no,
                 'fb_id' => $this->fb_id,
                 'form' => 1,
-                'cd' => $params['cd'],
+                'cd' => round($params['cd'] / 60),
                 'money' => $params['money'],
                 'wait_putIn' => $params['wait_putIn'],
                 'min' => $params['money'],
