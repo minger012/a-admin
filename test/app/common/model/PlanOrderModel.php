@@ -32,14 +32,14 @@ class PlanOrderModel extends Model
             ->where('cd', '>', 0)// 总时间大于0
             ->select()->toArray();
             foreach ($orders as $order) {
-//                try {
+                try {
                 $this->settleSingleOrder($order, $currentTime);
                 $success++;
-//                } catch (\Exception $e) {
-//                    // 记录错误日志
-//                    echo "订单结算失败 ID:{$order['id']} - " . $e->getMessage() . "\n";
-//                    $fail++;
-//                }
+                } catch (\Exception $e) {
+                    // 记录错误日志
+                    echo "订单结算失败 ID:{$order['id']} - " . $e->getMessage() . "\n";
+                    $fail++;
+                }
             }
             echo json_encode([
                 'success' => $success,
@@ -60,7 +60,7 @@ class PlanOrderModel extends Model
     private function settleSingleOrder($order, $currentTime)
     {
         // 计算已过去的时间（分钟）
-        $elapsedMinutes = max(0, round(($currentTime - $order['update_time']) / 60));
+        $elapsedMinutes = max(0, round(($currentTime - $order['start_time']) / 60));
         // 计算进度百分比
         if ($order['cd'] <= 0) {
             $schedule = 100;

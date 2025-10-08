@@ -77,7 +77,7 @@ class PlanOrder extends Base
         $input = request()->getContent();
         $params = json_decode($input, true);
         $validate = new PlanOrderValidate();
-        if (!$validate->append('id', 'require|number')->check($params,$validate->rule_edit)) {
+        if (!$validate->append('id', 'require|number')->check($params, $validate->rule_edit)) {
             return apiError($validate->getError());
         }
         try {
@@ -121,6 +121,8 @@ class PlanOrder extends Base
                     if (!empty($planOrder['cid'])) {
                         Db::table('user_coupon')->where('id', $planOrder['cid'])->update(['use_time' => 0]);
                     }
+                } elseif ($params['state'] == PlanOrderModel::state_2) {
+                    $params['start_time'] = time();
                 }
             } elseif ($planOrder['state'] == PlanOrderModel::state_4) {// 结算中
                 if (!in_array($params['state'], [PlanOrderModel::state_5])) {
