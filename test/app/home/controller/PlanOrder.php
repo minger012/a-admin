@@ -31,7 +31,7 @@ class PlanOrder extends Base
             $paginator = Db::table('plan_order')
                 ->alias('a')
                 ->join('plan b', 'a.plan_id = b.id')
-                ->join('goods c', 'a.goods_id = b.id')
+                ->join('goods c', 'a.goods_id = c.id')
                 ->where($where)
                 ->field('a.*,b.image,c.logo as goods_logo,c.type_name,c.intro as goods_intro')
                 ->order('a.id', 'desc')// 按ID倒序（可选）

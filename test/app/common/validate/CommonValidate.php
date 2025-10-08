@@ -45,7 +45,7 @@ class CommonValidate extends Validate
         'state' => 'in:1,2',
     ];
     public $config_id = [
-        'id' => 'in:1,2,3,9',
+        'id' => 'in:1,2,3,4,5,6,7,8,9',
     ];
     public $time_id = [
         'id' => 'require|in:0,1,2,3',

@@ -2,13 +2,14 @@
 
 namespace app\home\controller;
 
+use app\common\model\ConfigModel;
 use app\common\validate\CommonValidate;
 use think\facade\Db;
 use TimeClass;
 
 class Index extends Base
 {
-    public function index()
+    public function index(ConfigModel $model)
     {
         $input = request()->getContent();
         $params = json_decode($input, true);
@@ -53,7 +54,7 @@ class Index extends Base
                 ->field('username,score,lv,sign,sign_time,image')
                 ->find();
             $userData['isSign'] = isToday($userData['sign_time']) ? 1 : 0;
-
+            $userData['image'] = fileDomain($userData['image']);
             return apiSuccess('success', [
                 'userData' => $userData,
                 'planOrderData' => [

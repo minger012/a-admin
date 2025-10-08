@@ -421,7 +421,7 @@ class User extends Base
     }
 
     // 钱包
-    public function wallet(UserModel $model, ConfigModel $configModel)
+    public function wallet(UserModel $model)
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
@@ -443,7 +443,6 @@ class User extends Base
 
             return apiSuccess('success', [
                 'money' => $uif['money'],
-                're_service_address' => $configModel->getConfigValue(4, $this->userInfo['id']),
                 'wait_putIn' => $wait_putIn,
                 'wait_money' => $wait_money,
 

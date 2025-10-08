@@ -3,6 +3,8 @@
 namespace app\home\controller;
 
 use app\BaseController;
+use app\common\model\ConfigModel;
+use app\common\validate\CommonValidate;
 use app\home\model\UserModel;
 use app\home\validate\UserValidate;
 use think\facade\Db;
@@ -65,5 +67,19 @@ class Login extends BaseController
             Db::rollback();
             return apiError($e->getMessage());
         }
+    }
+
+    public function getConfig(ConfigModel $model)
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        try {
+            $value = $model->getConfigValue($params['ids']);
+            $res = apiSuccess('success', $value);
+            return $res;
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+
     }
 }

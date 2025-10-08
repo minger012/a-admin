@@ -30,7 +30,7 @@ class PlanOrderValidate extends Validate
         'plan.*.form' => 'require|in:1,2',
     ];
 
-    protected $rule_edit = [
+    public $rule_edit = [
         'show_num' => 'require|integer|egt:0',
         'click_num' => 'require|integer|egt:0',
         'state' => 'require|in:1,2,3,4,5',

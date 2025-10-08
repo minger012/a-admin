@@ -77,7 +77,7 @@ class PlanOrder extends Base
         $input = request()->getContent();
         $params = json_decode($input, true);
         $validate = new PlanOrderValidate();
-        if (!$validate->append('id', 'require|number')->check($params)) {
+        if (!$validate->append('id', 'require|number')->check($params,$validate->rule_edit)) {
             return apiError($validate->getError());
         }
         try {
@@ -85,9 +85,10 @@ class PlanOrder extends Base
             Db::startTrans();
             $where = [['id', '=', $params['id']]];
             if (!$this->isSuperAdmin()) {
-                $where[] = ['a.admin_id', '=', $this->adminInfo['id']];
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
             }
             $planOrder = Db::name('plan_order')->where($where)->find();
+
             if (!$planOrder) {
                 throw new \Exception(lang('non_existent'));
             }
@@ -97,7 +98,7 @@ class PlanOrder extends Base
                 ->lock(true)
                 ->field('money')
                 ->find();
-            if ($planOrder == PlanOrderModel::state_1) {// 匹配中
+            if ($planOrder['state'] == PlanOrderModel::state_1) {// 匹配中
                 if (!in_array($params['state'], [PlanOrderModel::state_2, PlanOrderModel::state_3])) {
                     throw new \Exception(lang('params_error'));
                 }
@@ -121,7 +122,7 @@ class PlanOrder extends Base
                         Db::table('user_coupon')->where('id', $planOrder['cid'])->update(['use_time' => 0]);
                     }
                 }
-            } elseif ($planOrder == PlanOrderModel::state_4) {// 结算中
+            } elseif ($planOrder['state'] == PlanOrderModel::state_4) {// 结算中
                 if (!in_array($params['state'], [PlanOrderModel::state_5])) {
                     throw new \Exception(lang('params_error'));
                 }
@@ -143,7 +144,7 @@ class PlanOrder extends Base
                 throw new \Exception(lang('params_error'));
             }
             $params['update_time'] = time();
-            Db::name('plan')
+            Db::name('plan_order')
                 ->where(['id' => $params['id']])
                 ->update($params);
             // 提交事务
@@ -152,7 +153,7 @@ class PlanOrder extends Base
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 

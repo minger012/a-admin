@@ -2,6 +2,7 @@
 
 namespace app\common\model;
 
+use think\facade\Db;
 use think\Model;
 
 class PlanOrderModel extends Model
@@ -27,19 +28,18 @@ class PlanOrderModel extends Model
             $success = 0;
             $fail = 0;
             // 查询需要结算的订单：状态为投放中(2)且未完成
-            $orders = $this->where('state', 2)// 投放中
+            $orders = Db::name($this->table)->where('state', 2)// 投放中
             ->where('cd', '>', 0)// 总时间大于0
             ->select()->toArray();
-
             foreach ($orders as $order) {
-                try {
-                    $this->settleSingleOrder($order, $currentTime);
-                    $success++;
-                } catch (\Exception $e) {
-                    // 记录错误日志
-                    echo "订单结算失败 ID:{$order['id']} - " . $e->getMessage() . "\n";
-                    $fail++;
-                }
+//                try {
+                $this->settleSingleOrder($order, $currentTime);
+                $success++;
+//                } catch (\Exception $e) {
+//                    // 记录错误日志
+//                    echo "订单结算失败 ID:{$order['id']} - " . $e->getMessage() . "\n";
+//                    $fail++;
+//                }
             }
             echo json_encode([
                 'success' => $success,
@@ -60,26 +60,22 @@ class PlanOrderModel extends Model
     private function settleSingleOrder($order, $currentTime)
     {
         // 计算已过去的时间（分钟）
-        $elapsedMinutes = max(0, ($currentTime - $order['update_time']) / 60);
-
+        $elapsedMinutes = max(0, round(($currentTime - $order['update_time']) / 60));
         // 计算进度百分比
         if ($order['cd'] <= 0) {
             $schedule = 100;
         } else {
             $schedule = min(100, (($order['cd'] - max(0, $order['cd'] - $elapsedMinutes)) / $order['cd']) * 100);
         }
-
         // 计算利润（根据你的业务逻辑调整）
         $profit = $this->calculateProfit($order, $schedule);
-
-        // 计算待投放
-        $wait_putIn = round($order['money'] * ($schedule / 100), 2);
-
+        // 计算已投放
+        $putIn = round($order['money'] * ($schedule / 100), 2);
         // 更新数据
         $updateData = [
             'schedule' => round($schedule, 2),
-            'wait_putIn' => $wait_putIn,
-            'putIn' => $order['money'] - $wait_putIn,
+            'wait_putIn' => $order['money'] - $putIn,
+            'putIn' => $putIn,
             'profit' => $profit,
             'update_time' => $currentTime
         ];
@@ -89,7 +85,6 @@ class PlanOrderModel extends Model
             $updateData['state'] = 4;
             $updateData['schedule'] = 100; // 确保进度为100%
         }
-
         // 更新数据库
         $this->where('id', $order['id'])->update($updateData);
         echo "订单号：{$order['id']},schedule：{$updateData['schedule']},profit:{$profit}\n";

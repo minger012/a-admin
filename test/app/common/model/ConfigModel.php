@@ -10,6 +10,8 @@ class ConfigModel extends Model
     protected $name = 'config';
 
     public static $strId = [1, 2];
+    public static $langId = [6, 7, 8, 9, 10];
+    public static $imageId = [6,9];
     public static $init = [
         ['id' => 1, 'title' => '货币符号', 'value' => ''],
         ['id' => 2, 'title' => '货币代码', 'value' => ''],
@@ -22,18 +24,38 @@ class ConfigModel extends Model
         ['id' => 9, 'title' => '广告中心Banner配置', 'value' => ''],
     ];
 
-    public function getConfigValue($id, $uid = 0)
+    public function getConfigValue($ids, $uid = 0)
     {
-        if ($id == 4 && $uid) {
-            $config = Db::table('user')->where('id', $uid)->value('re_service_address');
-            if ($config) {
-                return $config;
+        $config = $this->where([['id', 'in', $ids]])->select()->toArray();
+        $res = [];
+        foreach ($config as $value) {
+            $res[$value['id']] = $value['value'];
+//            if ($id == 4 && $uid) {
+//                $config = Db::table('user')->where('id', $uid)->value('re_service_address');
+//                if ($config) {
+//                    $res[$id] = $config;
+//                    continue;
+//                }
+//            }
+            if (in_array($value['id'], self::$strId)) {
+                $res[$value['id']] = $value['value'];
+                continue;
+            }
+            $res[$value['id']] = jsonDecode($value['value']);
+            if (in_array($value['id'], self::$langId)) {
+                $res[$value['id']] = $res[$value['id']][Request()->header('think-lang')] ?? [];
+            }
+            if (in_array($value['id'], self::$imageId)) {
+                foreach ($res[$value['id']] as $k1 => $v1) {
+                    if (isset($res[$value['id']][$k1]['icon'])) {
+                        $res[$value['id']][$k1]['icon'] = fileDomain($v1['icon']);
+                    }
+                    if (isset($res[$value['id']][$k1]['image'])) {
+                        $res[$value['id']][$k1]['image'] = fileDomain($v1['image']);
+                    }
+                }
             }
         }
-        $config = $this->where('id', $id)->value('value');
-        if (in_array($id, self::$strId)) {
-            return $config;
-        }
-        return jsonDecode($config);
+        return $res;
     }
 }
