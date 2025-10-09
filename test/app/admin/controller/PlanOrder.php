@@ -48,17 +48,37 @@ class PlanOrder extends Base
             if (!$this->isSuperAdmin()) {
                 $where[] = $planWhere[] = ['a.admin_id', '=', $this->adminInfo['id']];
             }
+
             $paginator = Db::table('plan_order')
                 ->alias('a')
                 ->join('user b', 'a.uid = b.id')
-                ->field('a.*,b.username,b.short_name')
+                ->order('a.id', 'desc')
+                ->field('a.fb_id, COUNT(*) as count')
+                ->group('a.fb_id')
                 ->where($where)
-                ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
                     'page' => $params['page'] ?? 1,     // 当前页码
                 ]);
             $list = $paginator->items();
+            $fbIds = $paginator->column('fb_id');
+            $details = Db::table('plan_order')
+                ->alias('a')
+                ->join('user b', 'a.uid = b.id')
+                ->order('a.id', 'desc')
+                ->field('a.*,b.username,b.short_name')
+                ->where('a.fb_id', 'in', $fbIds)
+                ->select()
+                ->toArray();
+            // 组织数据
+            $groupedDetails = [];
+            foreach ($details as $item) {
+                $groupedDetails[$item['fb_id']][] = $item;
+            }
+            // 合并数据
+            foreach ($list as &$item) {
+                $item['items'] = $groupedDetails[$item['fb_id']] ?? [];
+            }
             $res = [
                 'list' => $list,       // 当前页数据
                 'total' => $paginator->total(),       // 总记录数
@@ -68,7 +88,7 @@ class PlanOrder extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 

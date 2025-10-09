@@ -8,8 +8,6 @@ use app\admin\validate\UserValidate;
 use app\common\model\FlowModel;
 use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
-use app\common\service\OnlineUserService;
-use SnowflakeClass;
 use think\facade\Db;
 
 class User extends Base

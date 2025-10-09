@@ -18,36 +18,37 @@ class Withdraw extends Base
         }
         $where = [];
         if (!empty($params['uid'])) {
-            $where[] = ['w.uid', '=', $params['uid']];
+            $where[] = ['a.uid', '=', $params['uid']];
         }
         if (isset($params['state']) && $params['state'] != '') {
-            $where[] = ['w.state', '=', $params['state']];
+            $where[] = ['a.state', '=', $params['state']];
         }
         if (!empty($params['fb_id'])) {
-            $where[] = ['w.fb_id', '<=', $params['fb_id']];
+            $where[] = ['a.fb_id', '=', $params['fb_id']];
         }
         if (!empty($params['sTime'])) {
-            $where[] = ['w.create_time', '>=', $params['sTime']];
+            $where[] = ['a.create_time', '>=', $params['sTime']];
         }
         if (!empty($params['eTime'])) {
-            $where[] = ['w.create_time', '<=', $params['eTime']];
+            $where[] = ['a.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {
                 $adminId = $this->adminInfo['id'];
-                $where[] = ['u.admin_id', '=', $adminId];
+                $where[] = ['a.admin_id', '=', $adminId];
             } elseif (!empty($params['admin_username'])) {
                 $admin_id = Db::name('admin')->where(['username' => $params['admin_username']])->value('id');
                 if (!empty($admin_id)) {
-                    $where[] = ['w.admin_id', '=', $admin_id];
+                    $where[] = ['a.admin_id', '=', $admin_id];
                 }
             }
             $paginator = Db::table('withdraw')
-                ->alias('w')
-                ->join('user u', 'w.uid = u.id')
+                ->alias('a')
+                ->join('user b', 'a.uid = b.id')
+                ->join('admin c', 'a.admin_id = c.id')
                 ->where($where)
-                ->field('w.*, u.username')
-                ->order('w.id', 'desc')// 按ID倒序（可选）
+                ->field('a.*, b.username,c.username as admin_username')
+                ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
                     'page' => $params['page'] ?? 1,     // 当前页码
@@ -81,8 +82,8 @@ class Withdraw extends Base
             }
             $update['update_time'] = time();
             $update['currency'] = $params['currency'];
-            $update['address'] = $params['address'];
-            Db::name('plan')
+            $update['withdraw'] = $params['address'];
+            Db::name('withdraw')
                 ->where(['id' => $params['id']])
                 ->update($update);
             return apiSuccess();
@@ -123,17 +124,17 @@ class Withdraw extends Base
             // 审核通过
             if ($params['state'] == 1) {
                 // 扣除冻结资金
-                Db::table('user')->where('username', $withdrawInfo['username'])
+                Db::table('user')->where('id', $withdrawInfo['uid'])
                     ->dec('freeze_money', $withdrawInfo['money'])
                     ->update();
             } elseif ($params['state'] == 2) {
                 // 审核失败
                 $userInfo = Db::table('user')
-                    ->where('username', $withdrawInfo['username'])
+                    ->where('id', $withdrawInfo['uid'])
                     ->lock(true)
                     ->find();
                 // 扣除冻结资金返回余额 跟 额度
-                Db::table('user')->where('username', $withdrawInfo['username'])
+                Db::table('user')->where('id', $withdrawInfo['uid'])
                     ->dec('freeze_money', $withdrawInfo['money'])
                     ->inc('withdraw_limit', $withdrawInfo['money'])
                     ->inc('money', $withdrawInfo['money'])
@@ -156,7 +157,6 @@ class Withdraw extends Base
                     'user_remarks' => $params['user_remarks'],
                     'remarks' => $params['remarks'],
                     'update_time' => time(),
-                    'admin_name' => $this->adminInfo['username']
                 ]);
             // 提交事务
             Db::commit();
