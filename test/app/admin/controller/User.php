@@ -41,10 +41,10 @@ class User extends Base
             $where[] = ['a.lang', '=', $params['lang']];
         }
         if (!empty($params['sTime'])) {
-            $where[] = ['create_time', '>=', $params['sTime']];
+            $where[] = ['a.create_time', '>=', $params['sTime']];
         }
         if (!empty($params['eTime'])) {
-            $where[] = ['create_time', '<=', $params['eTime']];
+            $where[] = ['a.create_time', '<=', $params['eTime']];
         }
         try {
             if (!$this->isSuperAdmin()) {

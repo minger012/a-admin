@@ -18,43 +18,6 @@ class PlanOrderModel extends Model
     const state_5 = 5;// 结算成功
 
     /**
-     * 获取分组分页列表
-     */
-    public function getGroupedList($page = 1, $limit = 10)
-    {
-        // 获取分组统计
-        $groups = self::field('fb_id, COUNT(*) as count, MAX(create_time) as latest_time')
-            ->group('fb_id')
-            ->order('latest_time DESC')
-            ->paginate([
-                'list_rows' => $limit,
-                'page' => $page
-            ]);
-
-        // 获取对应详细数据
-        $fbIds = $groups->column('fb_id');
-        $details = self::where('fb_id', 'in', $fbIds)
-            ->order('fb_id, create_time DESC')
-            ->select()
-            ->toArray();
-
-        // 组织数据
-        $groupedDetails = [];
-        foreach ($details as $item) {
-            $groupedDetails[$item['fb_id']][] = $item;
-        }
-
-        // 合并数据
-        $groups->each(function($item) use ($groupedDetails) {
-            $item->items = $groupedDetails[$item['fb_id']] ?? [];
-            return $item;
-        });
-
-        return $groups;
-    }
-
-
-    /**
      * 结算订单逻辑
      */
     public function settleOrders()

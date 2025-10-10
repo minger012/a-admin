@@ -118,8 +118,12 @@ class PlanOrder extends Base
                 ->lock(true)
                 ->field('money')
                 ->find();
-            if ($planOrder['state'] == PlanOrderModel::state_1) {// 匹配中
-                if (!in_array($params['state'], [PlanOrderModel::state_2, PlanOrderModel::state_3])) {
+            if ($planOrder['state'] == PlanOrderModel::state_0) {
+                if (!in_array($params['state'], [PlanOrderModel::state_0, PlanOrderModel::state_3])) {
+                    throw new \Exception(lang('params_error'));
+                }
+            } else if ($planOrder['state'] == PlanOrderModel::state_1) {// 匹配中
+                if (!in_array($params['state'], [PlanOrderModel::state_1, PlanOrderModel::state_2, PlanOrderModel::state_3])) {
                     throw new \Exception(lang('params_error'));
                 }
                 if ($params['state'] == PlanOrderModel::state_3) {// 失败退回
@@ -145,7 +149,7 @@ class PlanOrder extends Base
                     $params['start_time'] = time();
                 }
             } elseif ($planOrder['state'] == PlanOrderModel::state_4) {// 结算中
-                if (!in_array($params['state'], [PlanOrderModel::state_5])) {
+                if (!in_array($params['state'], [PlanOrderModel::state_4, PlanOrderModel::state_5])) {
                     throw new \Exception(lang('params_error'));
                 }
                 // 添加资金
@@ -163,7 +167,7 @@ class PlanOrder extends Base
                     'create_time' => time(),
                 ]);
             } else {
-                throw new \Exception(lang('params_error'));
+                unset($params['state']);
             }
             $params['update_time'] = time();
             Db::name('plan_order')

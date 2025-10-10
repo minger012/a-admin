@@ -28,7 +28,7 @@ class PlanOrderValidate extends Validate
         'plan.*.max' => 'require|float|gt:0',
         'plan.*.cd' => 'require|integer|gt:0',
         'plan.*.form' => 'require|in:1,2',
-        'rate' => 'require|float|gt:0',
+        'plan.*.rate' => 'require|float|gt:0',
     ];
 
     public $rule_edit = [
