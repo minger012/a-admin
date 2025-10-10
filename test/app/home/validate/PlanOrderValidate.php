@@ -27,4 +27,11 @@ class PlanOrderValidate extends Validate
         'cd' => 'require|integer|gt:0',
         'cid' => 'integer|gt:0',
     ];
+
+    public $rule_send = [
+        'money' => 'require|float|gt:0',
+        'pay_password' => 'require',
+        'id' => 'require|integer|gt:0',
+        'cid' => 'integer|gt:0',
+    ];
 }
