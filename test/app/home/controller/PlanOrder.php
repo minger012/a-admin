@@ -184,6 +184,123 @@ class PlanOrder extends Base
         }
     }
 
+    // 下单 (后台派单的)
+    public function sendAdd()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        $validate = new PlanOrderValidate();
+        if (!$validate->check($params, $validate->rule_send)) {
+            return apiError($validate->getError());
+        }
+        try {
+            // 开始事务
+            Db::startTrans();
+            // 实付金额
+            $actual_money = $params['money'];
+            // 优惠券判断
+            if (!empty($params['cid'])) {
+                $couponInfo = Db::name('user_coupon')
+                    ->alias('a')
+                    ->join('coupon b', 'a.cid=b.id')
+                    ->field('a.*,b.min,b.max,b.type,b.state,b.discount,b.discount_amount')
+                    ->where('a.id', $params['cid'])
+                    ->where('a.uid', $this->userInfo['id'])
+                    ->find();
+                if (empty($couponInfo) || $couponInfo['state'] == 2) {
+                    throw new \Exception(lang('coupon_error'));
+                }
+                // 时间范围
+                if ($couponInfo['start_time'] > time() || $couponInfo['end_time'] < time()) {
+                    throw new \Exception(lang('coupon_time_error'));
+                }
+                if (!empty($couponInfo['use_time'])) {
+                    throw new \Exception(lang('coupon_is_use'));
+                }
+                // 金额范围
+                if (($couponInfo['min'] && $params['money'] < $couponInfo['min'])
+                    || ($couponInfo['max'] && $params['money'] > $couponInfo['min'])
+                ) {
+                    throw new \Exception(sprintf(lang('coupon_money_error'), $couponInfo['min'], $couponInfo['max']));
+                }
+                // 优惠券类型1增值2抵扣3团队4自定义5固定金额
+                if ($couponInfo['type'] == 1) {
+                    $params['money'] = round($params['money'] * (1 + $couponInfo['discount'] / 100), 2);
+                } else if ($couponInfo['type'] == 2 || $couponInfo['type'] == 3 || $couponInfo['type'] == 4) {
+                    $actual_money = round($params['money'] * (1 + $couponInfo['discount'] / 100), 2);
+                } else if ($couponInfo['type'] == 5) {
+                    $actual_money = round($params['money'] - $couponInfo['discount_amount']);
+                }
+                if ($actual_money <= 0) {
+                    throw new \Exception(lang('coupon_error'));
+                }
+                Db::name('user_coupon')->where('id', $params['cid'])->update(['use_time' => time()]);
+            }
+            // 判断余额
+            $userInfo = Db::name('user')
+                ->where('id', $this->userInfo['id'])
+                ->lock(true)
+                ->field('money,state,pay_password')
+                ->find();
+            if ($userInfo['state'] == 2) {
+                throw new \Exception(lang('user_impose'));
+            }
+            if ($actual_money > $userInfo['money']) {
+                throw new \Exception(lang('money_error'));
+            }
+            if ($userInfo['pay_password'] !== getMd5Password($params['pay_password'])) {
+                throw new \Exception(lang('password_error'));
+            }
+            // 判断订单
+            $planOrderInfo = Db::name('plan_order')
+                ->lock()
+                ->where('id', $params['id'])
+                ->find();
+            if (empty($planOrderInfo) || $planOrderInfo['uid'] != $this->userInfo['id'] || $planOrderInfo['state'] != PlanOrderModel::state_0) {
+                throw new \Exception(lang('order_error'));
+            }
+            if ($params['money'] < $planOrderInfo['min'] || $params['money'] > $planOrderInfo['max']) {
+                throw new \Exception(sprintf(lang('order_money_error'), $planOrderInfo['min'], $planOrderInfo['max']));
+            }
+            // 更新订单表
+            Db::name('plan_order')
+                ->where('id', $params['id'])
+                ->update([
+                    'money' => $params['money'],
+                    'wait_putIn' => $params['money'],
+                    'cid' => $params['cid'],
+                    'actual_money' => $actual_money,
+                    'state' => PlanOrderModel::state_2,
+                    'update_time' => time(),
+                    'start_time' => time(),
+                ]);
+            // 扣除资金
+            Db::table('user')->where('id', $this->userInfo['id'])->dec('money', $actual_money)->update();
+            // 添加流水
+            Db::table('flow')->insert([
+                'uid' => $this->userInfo['id'],
+                'type' => FlowModel::type_4,
+                'cid' => $params['cid'],
+                'admin_id' => $this->userInfo['admin_id'],
+                'coupon_money' => $params['money'] - $actual_money,
+                'before' => $userInfo['money'],
+                'after' => $userInfo['money'] - $actual_money,
+                'cha' => -$actual_money,
+                'fb_id' => $this->fb_id,
+                'order_no' => $planOrderInfo['order_no'],
+                'update_time' => time(),
+                'create_time' => time(),
+            ]);
+            // 提交事务
+            Db::commit();
+            return apiSuccess('order_success');
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            return apiError($e->getMessage());
+        }
+    }
+
     // 详情
     public function detail()
     {

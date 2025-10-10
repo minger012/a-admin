@@ -193,12 +193,12 @@ class PlanOrder extends Base
         try {
             $where = [
                 ['id', '=', $params['id']],
-                ['state', '=', PlanOrderModel::state_2],
+                ['state', '=', PlanOrderModel::state_0],
             ];
             if (!$this->isSuperAdmin()) {
                 $where[] = ['admin_id', '=', $this->adminInfo['id']];
             }
-            Db::name('plan')->where($where)->delete();
+            Db::name('plan_order')->where($where)->delete();
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e);

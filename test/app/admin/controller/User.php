@@ -20,10 +20,10 @@ class User extends Base
         if (!$validate->check($params, $validate->page_rule)) {
             return apiError($validate->getError());
         }
-        $where = [];
+        $where = [['is_del', '=', 0]];
         $planWhere = [];
         if (!empty($params['uid'])) {
-            $where[] = ['a.uid', '=', $params['uid']];
+            $where[] = ['a.id', '=', $params['uid']];
         }
         if (!empty($params['username'])) {
             $where[] = ['a.username', '=', $params['username']];
@@ -133,6 +133,25 @@ class User extends Base
             return apiSuccess();
         } catch (\Exception $e) {
             return apiError($e->getMessage());
+        }
+    }
+
+    public function del()
+    {
+        $input = request()->getContent();
+        $params = json_decode($input, true);
+        if (!(int)$params['id']) {
+            return apiError('params_error');
+        }
+        try {
+            $where = [['id', '=', $params['id']]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            Db::name('user')->where($where)->update(['is_del' => 1]);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e);
         }
     }
 

@@ -58,6 +58,7 @@ class Login extends BaseController
                 'fb_id' => getFbId(),
                 'code' => $params['code'],
                 'score' => 100,
+                'image' => '/static/image/head' . rand(1, 7) . '.jpeg',
             ]);
             // 提交事务
             Db::commit();
