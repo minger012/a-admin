@@ -1,1 +1,0 @@
-import{d as o,x as _,w as t,q as s,o as a,j as c,X as p}from"./index-FB6W5mBG.js";const u=o({__name:"index",setup(r){return(d,m)=>{const e=p,n=s;return a(),_(n,{bordered:!1,class:"proCard"},{default:t(()=>[c(e,{description:"用户优惠券功能开发中..."})]),_:1})}}});export{u as default};
