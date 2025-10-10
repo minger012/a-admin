@@ -44,7 +44,7 @@ class Login extends BaseController
                 if ($codeData['state'] == 1) {
                     throw new \Exception('授权码已被使用');
                 }
-                Db::name('code')->where('code', $params['code'])->update(['state' => 1]);
+                Db::name('code')->where('code', $params['code'])->update(['state' => 1, 'update_time' => time()]);
             }
             Db::name('user')->insert([
                 'username' => $params['username'],
