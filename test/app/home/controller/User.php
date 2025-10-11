@@ -425,7 +425,7 @@ class User extends Base
     {
         try {
             $count = Db::table('user_mail')
-                ->where('id', $this->userInfo['id'])
+                ->where('uid', $this->userInfo['id'])
                 ->where('read_time', 0)
                 ->count();
             return apiSuccess('success', $count);

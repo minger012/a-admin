@@ -91,8 +91,8 @@ class EncryptClass
      */
     public function codeEncrypt($txt, $key)
     {
-        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        $ikey = "h2xiIUshvMldhAQaQgWisffsOlNVRRt7";
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $ikey = "H2XIIUSHVMLDHAQAQGWISFFSOLNVRRT7";
         $nh1 = rand(0, 61);
         $nh2 = rand(0, 61);
         $nh3 = rand(0, 61);
@@ -132,8 +132,8 @@ class EncryptClass
      */
     public function codeDecrypt($txt, $key)
     {
-        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        $ikey = "h2xiIUshvMldhAQaQgWisffsOlNVRRt7";
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $ikey = "H2XIIUSHVMLDHAQAQGWISFFSOLNVRRT7";
         $knum = 0;
         $i = 0;
         $tlen = strlen($txt);

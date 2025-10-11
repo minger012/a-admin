@@ -4,6 +4,7 @@ namespace app\home\controller;
 
 use app\common\model\ConfigModel;
 use app\common\validate\CommonValidate;
+use EncryptClass;
 use think\facade\Db;
 use TimeClass;
 
@@ -55,6 +56,7 @@ class Index extends Base
                 ->find();
             $userData['isSign'] = isToday($userData['sign_time']) ? 1 : 0;
             $userData['image'] = fileDomain($userData['image']);
+            $userData['code'] = (new EncryptClass())->codeEncrypt($this->userInfo['id'], 'yaoqingma');
             return apiSuccess('success', [
                 'userData' => $userData,
                 'planOrderData' => [
