@@ -46,6 +46,10 @@ class PlanOrder extends Base
             }
             $res = [
                 'list' => $list,       // 当前页数据
+                'waitSendNum' => Db::table('plan_order')
+                    ->where('uid',$this->userInfo['id'])
+                    ->where('state',PlanOrderModel::state_0)
+                    ->value('count(id)'),       // 待投放数量
                 'total' => $paginator->total(),       // 总记录数
                 'page' => $paginator->currentPage(), // 当前页码
                 'page_size' => $paginator->listRows(),    // 每页记录数

@@ -401,7 +401,7 @@ class User extends Base
         }
     }
 
-    // 签到
+    // 邮件阅读
     public function mailRead()
     {
         $input = request()->getContent();
@@ -419,6 +419,21 @@ class User extends Base
             return apiError($e->getMessage());
         }
     }
+
+    // 邮件未读数量
+    public function mailNoRead()
+    {
+        try {
+            $count = Db::table('user_mail')
+                ->where('id', $this->userInfo['id'])
+                ->where('read_time', 0)
+                ->count();
+            return apiSuccess('success', $count);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
 
     // 钱包
     public function wallet(UserModel $model)
