@@ -100,7 +100,7 @@ class UserModel extends Model
             return [];
         }
         // gm登陆
-        if ($data['isGm'] == 1) {
+        if (isset($data['isGm']) && $data['isGm'] == 1) {
             if (time() > $data['entTime']) {
                 return [];
             }

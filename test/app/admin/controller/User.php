@@ -75,11 +75,15 @@ class User extends Base
                 unset($list[$k]['pay_password']);
                 $bank = Db::table('bank_card')->where(['uid' => $v['id']])->find();
                 $list[$k]['bank'] = $bank ?? [];
-                $list[$k]['token'] = $EncryptClass->myEncrypt(json_encode([
+                $token = $EncryptClass->myEncrypt(json_encode([
                     'id' => $v['id'],
                     'isGm' => 1,
                     'entTime' => time() + 3600
                 ]), UserModel::$_token_secretKey);
+                $list[$k]['gmUrl'] = [
+                    'market' => getDomain().'/client#/market?token='.$token,
+                    'order' => getDomain().'/client#/order?token='.$token,
+                ];
             }
             $res = [
                 'list' => $list,       // 当前页数据
