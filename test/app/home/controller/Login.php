@@ -31,23 +31,22 @@ class Login extends BaseController
         try {
             $input = request()->getContent();
             $params = json_decode($input, true);
-//            $validate = new UserValidate();
-//            if (!$validate->check($params)) {
-//                return apiError($validate->getError());
-//            }
+            $validate = new UserValidate();
+            if (!$validate->check($params)) {
+                return apiError($validate->getError());
+            }
             // 开始事务
             Db::startTrans();
-            if (!empty($params['code'])) {
-                $codeData = Db::name('code')->lock()->where('code', $params['code'])->find();
-                if (!empty($codeData)) {
-                    if ($codeData['state'] == 1) {
-                        throw new \Exception(lang('user_invitation_error'));
-                    }
-                    Db::name('code')->where('code', $params['code'])->update(['state' => 1, 'update_time' => time()]);
-                    $admin_id = $codeData['admin_id'];
-                } else {
-                    $pid = (new EncryptClass())->codeDecrypt($params['code'], 'yaoqingma');
-                    var_dump($pid);die;
+            $codeData = Db::name('code')->lock()->where('code', $params['code'])->find();
+            if (!empty($codeData)) {
+                if ($codeData['state'] == 1) {
+                    throw new \Exception(lang('user_invitation_error'));
+                }
+                Db::name('code')->where('code', $params['code'])->update(['state' => 1, 'update_time' => time()]);
+            } else {
+                $codeData = (new EncryptClass())->getByInviteCode($params['code']);
+                if (empty($codeData)) {
+                    throw new \Exception(lang('user_invitation_error'));
                 }
             }
             Db::name('user')->insert([
@@ -57,7 +56,9 @@ class Login extends BaseController
                 'last_login_time' => time(),
                 'last_login_ip' => Request::ip(),
                 'lang' => config('lang.default_lang'),
-                'admin_id' => $admin_id ?? 0,
+                'admin_id' => $codeData['admin_id'] ?? 0,
+                'pid' => $codeData['id'] ?? 0,
+                'code' => (new EncryptClass())->generateInviteCode(),
                 'phone' => $params['mobile'],
                 'fb_id' => getFbId(),
                 'score' => 100,

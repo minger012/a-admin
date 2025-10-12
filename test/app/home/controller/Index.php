@@ -56,7 +56,7 @@ class Index extends Base
                 ->find();
             $userData['isSign'] = isToday($userData['sign_time']) ? 1 : 0;
             $userData['image'] = fileDomain($userData['image']);
-            $userData['code'] = (new EncryptClass())->codeEncrypt($this->userInfo['id']);
+            $userData['code'] = (new EncryptClass())->generateInviteCode();
             return apiSuccess('success', [
                 'userData' => $userData,
                 'planOrderData' => [

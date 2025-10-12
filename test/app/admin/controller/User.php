@@ -81,8 +81,8 @@ class User extends Base
                     'entTime' => time() + 3600
                 ]), UserModel::$_token_secretKey);
                 $list[$k]['gmUrl'] = [
-                    'market' => getDomain().'/client#/market?token='.$token,
-                    'order' => getDomain().'/client#/order?token='.$token,
+                    'market' => getDomain() . '/client#/market?token=' . $token,
+                    'order' => getDomain() . '/client#/order?token=' . $token,
                 ];
             }
             $res = [
@@ -124,6 +124,84 @@ class User extends Base
         } catch (\Exception $e) {
             return apiError($e->getMessage());
         }
+    }
+
+    /**
+     * 获取用户代理关系路径
+     */
+    public function getUserRelationPath()
+    {
+        try {
+            // 接收JSON参数
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+
+            $userId = isset($params['uid']) ? intval($params['uid']) : 0;
+
+            if (!$userId) {
+                return json([
+                    'code' => 0,
+                    'msg' => '用户ID不能为空',
+                    'data' => null
+                ]);
+            }
+
+            // 获取用户层级关系路径
+            $relationPath = $this->getUserHierarchy($userId);
+
+            // 计算当前层级
+            $currentLevel = count($relationPath);
+
+            $responseData = [
+                'current_level' => $currentLevel,
+                'relation_path' => $relationPath,
+                'current_uid' => $userId
+            ];
+
+            return json([
+                'code' => 1,
+                'msg' => '成功',
+                'data' => $responseData
+            ]);
+
+        } catch (\Exception $e) {
+            return json([
+                'code' => 0,
+                'msg' => '获取用户关系失败: ' . $e->getMessage(),
+                'data' => null
+            ]);
+        }
+    }
+
+    /**
+     * 递归获取用户层级关系
+     */
+    private function getUserHierarchy($userId, $path = [])
+    {
+        // 获取当前用户信息
+        $user = Db::name('user')
+            ->field('id, pid, username, short_name')
+            ->where('id', $userId)
+            ->find();
+
+        if (!$user) {
+            return $path;
+        }
+
+        // 将当前用户添加到路径开头
+        array_unshift($path, [
+            'uid' => $user['id'],
+            'username' => $user['username'],
+            'short_name' => $user['short_name'],
+            'is_current' => empty($path) // 最后一个添加的是当前用户
+        ]);
+
+        // 如果有父级，继续递归
+        if ($user['pid'] > 0) {
+            return $this->getUserHierarchy($user['pid'], $path);
+        }
+
+        return $path;
     }
 
     // 修改登录密码
@@ -210,10 +288,10 @@ class User extends Base
             $update['address'] = $params['address'];
             $res = Db::name('bank_card')->where(['uid' => $params['id']])->find();
             if (!$res) {
+                $update['uid'] = $params['id'];
                 $update['create_time'] = time();
-                Db::name('bank_card')
-                    ->where($where)
-                    ->insert($update);
+                unset($params['id']);
+                Db::name('bank_card')->insert($update);
             } else {
                 Db::name('bank_card')
                     ->where($where)
