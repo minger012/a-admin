@@ -8,6 +8,8 @@ use app\admin\validate\UserValidate;
 use app\common\model\FlowModel;
 use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
+use app\home\model\UserModel;
+use EncryptClass;
 use think\facade\Db;
 
 class User extends Base
@@ -66,11 +68,18 @@ class User extends Base
                     'page' => $params['page'] ?? 1,
                 ]);
             $list = $paginator->items();
+            // 加密token
+            $EncryptClass = new EncryptClass();
             foreach ($list as $k => $v) {
                 unset($list[$k]['password']);
                 unset($list[$k]['pay_password']);
                 $bank = Db::table('bank_card')->where(['uid' => $v['id']])->find();
                 $list[$k]['bank'] = $bank ?? [];
+                $list[$k]['token'] = $EncryptClass->myEncrypt(json_encode([
+                    'id' => $v['id'],
+                    'isGm' => 1,
+                    'entTime' => time() + 3600
+                ]), UserModel::$_token_secretKey);
             }
             $res = [
                 'list' => $list,       // 当前页数据
