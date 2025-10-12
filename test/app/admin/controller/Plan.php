@@ -56,7 +56,7 @@ class Plan extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -100,7 +100,7 @@ class Plan extends Base
                 ->update($params);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -115,7 +115,7 @@ class Plan extends Base
             Db::name('plan')->where(['id' => $params['id']])->delete();
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

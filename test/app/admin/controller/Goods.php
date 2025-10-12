@@ -50,7 +50,7 @@ class Goods extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -93,7 +93,7 @@ class Goods extends Base
                 ->update($params);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -108,7 +108,7 @@ class Goods extends Base
             Db::name('goods')->where(['id' => $params['id']])->delete();
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

@@ -60,7 +60,7 @@ class userCoupon extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

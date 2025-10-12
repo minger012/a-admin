@@ -139,10 +139,10 @@ class Index extends Base
                 'day_details' => $detailData,
             ];
 
-            // 如果是明细视图，添加分页信息
-            if ($viewType === 'detail') {
+//            // 如果是明细视图，添加分页信息
+//            if ($viewType === 'detail') {
                 $responseData['pagination'] = $detailPagination;
-            }
+//            }
 
             return json([
                 'code' => 1,
@@ -393,14 +393,14 @@ class Index extends Base
             }
 
             return json([
-                'code' => 200,
+                'code' => 1,
                 'message' => 'success',
                 'data' => $responseData
             ]);
 
         } catch (\Exception $e) {
             return json([
-                'code' => 500,
+                'code' => 0,
                 'message' => '获取充值统计数据失败: ' . $e->getMessage(),
                 'data' => null
             ]);
@@ -461,7 +461,7 @@ class Index extends Base
             ]);
 
             return json([
-                'code' => 200,
+                'code' => 1,
                 'message' => 'success',
                 'data' => [
                     'day_details' => $paginator->items(),
@@ -476,7 +476,7 @@ class Index extends Base
 
         } catch (\Exception $e) {
             return json([
-                'code' => 500,
+                'code' => 0,
                 'message' => '获取充值明细数据失败: ' . $e->getMessage(),
                 'data' => null
             ]);
@@ -658,14 +658,14 @@ class Index extends Base
             }
 
             return json([
-                'code' => 200,
+                'code' => 1,
                 'message' => 'success',
                 'data' => $responseData
             ]);
 
         } catch (\Exception $e) {
             return json([
-                'code' => 500,
+                'code' => 0,
                 'message' => '获取提现统计数据失败: ' . $e->getMessage(),
                 'data' => null
             ]);
@@ -726,7 +726,7 @@ class Index extends Base
             ]);
 
             return json([
-                'code' => 200,
+                'code' => 1,
                 'message' => 'success',
                 'data' => [
                     'day_details' => $paginator->items(),
@@ -741,7 +741,7 @@ class Index extends Base
 
         } catch (\Exception $e) {
             return json([
-                'code' => 500,
+                'code' => 0,
                 'message' => '获取提现明细数据失败: ' . $e->getMessage(),
                 'data' => null
             ]);
@@ -1046,14 +1046,14 @@ class Index extends Base
             ];
 
             return json([
-                'code' => 200,
+                'code' => 1,
                 'message' => 'success',
                 'data' => $responseData
             ]);
 
         } catch (\Exception $e) {
             return json([
-                'code' => 500,
+                'code' => 0,
                 'message' => '获取提现明细数据失败: ' . $e->getMessage(),
                 'data' => null
             ]);

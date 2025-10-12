@@ -122,7 +122,7 @@ class User extends Base
                 ->update($params);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -164,7 +164,7 @@ class User extends Base
             Db::name('user')->where($where)->update(['is_del' => 1]);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -313,7 +313,7 @@ class User extends Base
             $userInfo = Db::name('user')
                 ->where($where)
                 ->lock(true)
-                ->field('money,id,pay_count,operate_id')
+                ->field('money,id,pay_count')
                 ->find();
             if (empty($userInfo)) {
                 throw new \Exception(lang('login_null'));
@@ -347,7 +347,6 @@ class User extends Base
                 'before' => $userInfo['money'],
                 'after' => $userInfo['money'] + $params['money'],
                 'cha' => $params['money'],
-                'operate_id' => $userInfo['operate_id'],
                 'update_time' => time(),
                 'create_time' => time(),
             ]);
@@ -389,7 +388,7 @@ class User extends Base
             Db::name('user_coupon')->insert($update);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -435,7 +434,7 @@ class User extends Base
             Db::name('plan_order')->insertAll($sqlArr);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }
