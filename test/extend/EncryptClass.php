@@ -1,6 +1,8 @@
 <?php
 
 //验证类
+use think\facade\Db;
+
 class EncryptClass
 {
     protected $_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.';
@@ -91,8 +93,8 @@ class EncryptClass
      */
     public function codeEncrypt($txt, $key)
     {
-        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        $ikey = "h2xiIUshvMldhAQaQgWisffsOlNVRRt7";
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $ikey = "H2XIIUSHVMLDHAQAQGWISFFSOLNVRRT7";
         $nh1 = rand(0, 61);
         $nh2 = rand(0, 61);
         $nh3 = rand(0, 61);
@@ -132,8 +134,8 @@ class EncryptClass
      */
     public function codeDecrypt($txt, $key)
     {
-        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        $ikey = "h2xiIUshvMldhAQaQgWisffsOlNVRRt7";
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $ikey = "H2XIIUSHVMLDHAQAQGWISFFSOLNVRRT7";
         $knum = 0;
         $i = 0;
         $tlen = strlen($txt);
@@ -175,5 +177,41 @@ class EncryptClass
     {
         list($encryptedData, $iv) = explode('::', base64_decode($data), 2);
         return openssl_decrypt($encryptedData, 'aes-256-cbc', $key, 0, $iv);
+    }
+
+    /**
+     * 简化版 - 直接生成9位随机邀请码并建立映射关系
+     * @param $txt
+     * @return string
+     */
+    public function generateInviteCode()
+    {
+        $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $code = '';
+        do {
+            // 生成9位随机码
+            for ($i = 0; $i < 9; $i++) {
+                $code .= $chars[rand(0, 35)];
+            }
+            $id = Db::name('user')->where('code', $code)->value('id');
+        } while (!empty($id));
+        return $code;
+    }
+
+    /**
+     * 简化版 - 通过邀请码查找原始数据
+     * @param $code
+     * @return mixed
+     */
+    public function getByInviteCode($code)
+    {
+        // 从数据库查询
+        return Db::name('user')
+            ->where('code', $code)
+            ->field('id,admin_id')
+            ->find();
+
+        // 临时返回示例
+//        return substr($code, 0, 4); // 示例逻辑
     }
 }

@@ -41,7 +41,7 @@ class Coupon extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -112,7 +112,7 @@ class Coupon extends Base
                 ->update($params);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -127,7 +127,7 @@ class Coupon extends Base
             Db::name('coupon')->where(['id' => $params['id']])->delete();
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

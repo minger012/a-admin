@@ -23,8 +23,8 @@ class MailValidate extends Validate
     protected $rule = [
         'sendType' => 'integer|in:1,2',
         'type' => 'integer|in:1,2,3',
-        'title' => 'require|alphaDash',
-        'content' => 'require|alphaDash',
+        'title' => 'require|chsDash',
+        'content' => 'require|chsDash',
         'uids' => 'array',
     ];
 }

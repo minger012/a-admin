@@ -39,7 +39,7 @@ class Plan extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -63,7 +63,7 @@ class Plan extends Base
             $planData['app_info'] = jsonDecode($planData['app_info']);
             return apiSuccess('success', $planData);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

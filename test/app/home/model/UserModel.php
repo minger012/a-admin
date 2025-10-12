@@ -12,8 +12,9 @@ class UserModel extends Model
     protected $table = 'user';
     //登录缓存key
     static protected $_login_cache_key = 'home_user_';
+    static protected $_gm_login_cache_key = 'gm_user_';
     //加密密钥
-    static protected $_token_secretKey = 'ycadmin_user';
+    static public $_token_secretKey = 'ycadmin_user';
     //邀请密钥
     static protected $_invitation_secretKey = 'ycadmin_user_invitation';
     //登录有效期
@@ -98,9 +99,38 @@ class UserModel extends Model
         if (empty($data)) {
             return [];
         }
-        $userInfo = Cache::get(self::$_login_cache_key . $data['username']);
-        if (empty($userInfo) || $userInfo['token'] !== $token) {
-            return [];
+        // gm登陆
+        if (isset($data['isGm']) && $data['isGm'] == 1) {
+            if (time() > $data['entTime']) {
+                return [];
+            }
+            $userInfo = Cache::get(self::$_gm_login_cache_key . $data['id']);
+            if (empty($userInfo)) {
+                // 获取用户数据
+                $user = Db::table('user')->where('id', $data['id'])->find();
+                if (empty($user)) {
+                    return [];
+                }
+                // 返回数据
+                $userInfo = [
+                    'id' => $user['id'],
+                    'last_login_time' => $user['last_login_time'],
+                    'last_login_ip' => $user['last_login_ip'],
+                    'lang' => $user['lang'] ?? config('lang.default_lang'),
+                    'set_pay_password' => $user['pay_password'] ? 1 : 0,// 是否有设置支付密码
+                    'set_card' => !empty($cardId) ? 1 : 0,
+                    'username' => $user['username'],
+                    'name' => $user['name'],
+                    'admin_id' => $user['admin_id'],
+                ];
+                // 缓存
+                Cache::set(self::$_gm_login_cache_key . $user['id'], $userInfo, 3600);
+            }
+        } else {
+            $userInfo = Cache::get(self::$_login_cache_key . $data['username']);
+            if (empty($userInfo) || $userInfo['token'] !== $token) {
+                return [];
+            }
         }
         return $userInfo;
     }

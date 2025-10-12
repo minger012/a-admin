@@ -57,7 +57,7 @@ class Mail extends Base
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -100,7 +100,7 @@ class Mail extends Base
             Db::name('user_mail')->insertAll($sqlArr);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

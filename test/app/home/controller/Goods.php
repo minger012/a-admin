@@ -29,7 +29,7 @@ class Goods extends Base
             }
             return apiSuccess('success', $goodsData);
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

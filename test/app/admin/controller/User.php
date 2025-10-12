@@ -8,6 +8,8 @@ use app\admin\validate\UserValidate;
 use app\common\model\FlowModel;
 use app\common\model\PlanOrderModel;
 use app\common\validate\CommonValidate;
+use app\home\model\UserModel;
+use EncryptClass;
 use think\facade\Db;
 
 class User extends Base
@@ -66,11 +68,22 @@ class User extends Base
                     'page' => $params['page'] ?? 1,
                 ]);
             $list = $paginator->items();
+            // 加密token
+            $EncryptClass = new EncryptClass();
             foreach ($list as $k => $v) {
                 unset($list[$k]['password']);
                 unset($list[$k]['pay_password']);
                 $bank = Db::table('bank_card')->where(['uid' => $v['id']])->find();
                 $list[$k]['bank'] = $bank ?? [];
+                $token = $EncryptClass->myEncrypt(json_encode([
+                    'id' => $v['id'],
+                    'isGm' => 1,
+                    'entTime' => time() + 3600
+                ]), UserModel::$_token_secretKey);
+                $list[$k]['gmUrl'] = [
+                    'market' => getDomain() . '/client#/market?token=' . $token,
+                    'order' => getDomain() . '/client#/order?token=' . $token,
+                ];
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -109,8 +122,86 @@ class User extends Base
                 ->update($params);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
+    }
+
+    /**
+     * 获取用户代理关系路径
+     */
+    public function getUserRelationPath()
+    {
+        try {
+            // 接收JSON参数
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+
+            $userId = isset($params['uid']) ? intval($params['uid']) : 0;
+
+            if (!$userId) {
+                return json([
+                    'code' => 0,
+                    'msg' => '用户ID不能为空',
+                    'data' => null
+                ]);
+            }
+
+            // 获取用户层级关系路径
+            $relationPath = $this->getUserHierarchy($userId);
+
+            // 计算当前层级
+            $currentLevel = count($relationPath);
+
+            $responseData = [
+                'current_level' => $currentLevel,
+                'relation_path' => $relationPath,
+                'current_uid' => $userId
+            ];
+
+            return json([
+                'code' => 1,
+                'msg' => '成功',
+                'data' => $responseData
+            ]);
+
+        } catch (\Exception $e) {
+            return json([
+                'code' => 0,
+                'msg' => '获取用户关系失败: ' . $e->getMessage(),
+                'data' => null
+            ]);
+        }
+    }
+
+    /**
+     * 递归获取用户层级关系
+     */
+    private function getUserHierarchy($userId, $path = [])
+    {
+        // 获取当前用户信息
+        $user = Db::name('user')
+            ->field('id, pid, username, short_name')
+            ->where('id', $userId)
+            ->find();
+
+        if (!$user) {
+            return $path;
+        }
+
+        // 将当前用户添加到路径开头
+        array_unshift($path, [
+            'uid' => $user['id'],
+            'username' => $user['username'],
+            'short_name' => $user['short_name'],
+            'is_current' => empty($path) // 最后一个添加的是当前用户
+        ]);
+
+        // 如果有父级，继续递归
+        if ($user['pid'] > 0) {
+            return $this->getUserHierarchy($user['pid'], $path);
+        }
+
+        return $path;
     }
 
     // 修改登录密码
@@ -151,7 +242,7 @@ class User extends Base
             Db::name('user')->where($where)->update(['is_del' => 1]);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -197,10 +288,10 @@ class User extends Base
             $update['address'] = $params['address'];
             $res = Db::name('bank_card')->where(['uid' => $params['id']])->find();
             if (!$res) {
+                $update['uid'] = $params['id'];
                 $update['create_time'] = time();
-                Db::name('bank_card')
-                    ->where($where)
-                    ->insert($update);
+                unset($params['id']);
+                Db::name('bank_card')->insert($update);
             } else {
                 Db::name('bank_card')
                     ->where($where)
@@ -300,7 +391,7 @@ class User extends Base
             $userInfo = Db::name('user')
                 ->where($where)
                 ->lock(true)
-                ->field('money,id,pay_count,operate_id')
+                ->field('money,id,pay_count')
                 ->find();
             if (empty($userInfo)) {
                 throw new \Exception(lang('login_null'));
@@ -334,7 +425,6 @@ class User extends Base
                 'before' => $userInfo['money'],
                 'after' => $userInfo['money'] + $params['money'],
                 'cha' => $params['money'],
-                'operate_id' => $userInfo['operate_id'],
                 'update_time' => time(),
                 'create_time' => time(),
             ]);
@@ -376,7 +466,7 @@ class User extends Base
             Db::name('user_coupon')->insert($update);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 
@@ -422,7 +512,7 @@ class User extends Base
             Db::name('plan_order')->insertAll($sqlArr);
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

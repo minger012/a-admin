@@ -201,7 +201,7 @@ class PlanOrder extends Base
             Db::name('plan_order')->where($where)->delete();
             return apiSuccess();
         } catch (\Exception $e) {
-            return apiError($e);
+            return apiError($e->getMessage());
         }
     }
 }

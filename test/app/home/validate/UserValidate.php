@@ -28,7 +28,7 @@ class UserValidate extends Validate
         'username' => 'require|alphaNum|unique:user|length:2,32',
         'password' => 'require|length:6,32',
         'repassword' => 'require|confirm:password',
-        'code' => 'require|integer|gt:0',
+        'code' => 'require|alphaNum|gt:0',
     ];
 
     public $login_rule = [

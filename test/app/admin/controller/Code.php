@@ -88,7 +88,7 @@ class Code extends Base
 //                ->update($params);
 //            return apiSuccess();
 //        } catch (\Exception $e) {
-//            return apiError($e);
+//            return apiError($e->getMessage());
 //        }
 //    }
 
@@ -103,7 +103,7 @@ class Code extends Base
 //            Db::name('code')->where(['id' => $params['id']])->delete();
 //            return apiSuccess();
 //        } catch (\Exception $e) {
-//            return apiError($e);
+//            return apiError($e->getMessage());
 //        }
 //    }
 }
