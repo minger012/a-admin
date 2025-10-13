@@ -135,7 +135,7 @@ class User extends Base
         try {
             // 开始事务
             Db::startTrans();
-            $cardInfo = Db::name('bank_card')->where('id', $this->userInfo['id'])->find();
+            $cardInfo = Db::name('bank_card')->where('uid', $this->userInfo['id'])->find();
             if (empty($cardInfo)) {
                 throw new \Exception(lang('bank_error'));
             }

@@ -532,10 +532,11 @@ class Index extends Base
 
             // 构建查询条件
             $where = [
-                ['state', '=', 1], // 只统计审核通过的提现
                 ['update_time', 'between', [$startTime, $endTime]]
             ];
-
+            if (isset($params['status']) && $params['status'] != '') {
+                $where[] = ['state', '=', $params['status']];
+            }
             // 权限判断
             if (!$this->isSuperAdmin()) {
                 $where[] = ['admin_id', '=', $this->adminInfo['id']];
@@ -567,9 +568,7 @@ class Index extends Base
                     COUNT(*) as withdraw_count,
                     SUM(money) as withdraw_amount
                 ")
-                ->where([
-                    ['update_time', 'between', [$startTime, $endTime]]
-                ])
+                ->where($where)
                 ->group('state')
                 ->select()
                 ->toArray();
@@ -694,9 +693,12 @@ class Index extends Base
 
             // 构建查询条件
             $where = [
-                ['state', '=', 1], // 只统计审核通过的提现
                 ['update_time', 'between', [$startTime, $endTime]]
             ];
+
+            if (isset($params['status']) && $params['status'] != '') {
+                $where[] = ['state', '=', $params['status']];
+            }
 
             // 权限判断
             if (!$this->isSuperAdmin()) {
@@ -707,7 +709,6 @@ class Index extends Base
                     $where[] = ['admin_id', '=', $admin_id];
                 }
             }
-
             $detailQuery = Db::table('withdraw')
                 ->field("
                     id,
