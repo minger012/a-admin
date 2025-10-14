@@ -24,21 +24,12 @@ class ConfigModel extends Model
         ['id' => 9, 'title' => '广告中心Banner配置', 'value' => ''],
     ];
 
-    public function getConfigValue($ids, $uid = 0)
+    public function getConfigValue($ids)
     {
         $config = $this->where([['id', 'in', $ids]])->select()->toArray();
         $res = [];
         foreach ($config as $value) {
             $res[$value['id']] = $value['value'];
-            if ($value['id'] == 4 && $uid) {
-                $config = Db::table('user')->where('id', $uid)->value('service_address');
-                if ($config) {
-                    $res[$value['id']] = [
-                        ['label' => 'czkefu1', 'link' => $config, 'type' => '跳转app']
-                    ];
-                    continue;
-                }
-            }
             if (in_array($value['id'], self::$strId)) {
                 $res[$value['id']] = $value['value'];
                 continue;
