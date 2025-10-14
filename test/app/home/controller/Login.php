@@ -49,7 +49,12 @@ class Login extends BaseController
                     throw new \Exception(lang('user_invitation_error'));
                 }
             }
-            Db::name('user')->insert([
+
+            // 生成fb_id
+            $fbId = getFbId();
+
+            // 插入用户数据
+            $userId = Db::name('user')->insertGetId([
                 'username' => $params['username'],
                 'password' => getMd5Password($params['password']),
                 'create_time' => time(),
@@ -60,10 +65,14 @@ class Login extends BaseController
                 'pid' => $codeData['id'] ?? 0,
                 'code' => (new EncryptClass())->generateInviteCode(),
                 'phone' => $params['mobile'],
-                'fb_id' => getFbId(),
+                'fb_id' => $fbId,
                 'score' => 100,
                 'image' => '/static/image/head' . rand(1, 7) . '.jpeg',
             ]);
+
+            // 注册送新人券
+            $this->giveNewUserCoupon($userId, $fbId);
+
             // 提交事务
             Db::commit();
             return apiSuccess();
@@ -71,6 +80,61 @@ class Login extends BaseController
             // 回滚事务
             Db::rollback();
             return apiError($e->getMessage());
+        }
+    }
+
+    /**
+     * 给新用户发放新人券
+     * @param int $userId 用户ID
+     * @param string $fbId 用户fb_id
+     */
+    private function giveNewUserCoupon($userId, $fbId)
+    {
+        // 查询所有可用的新人券
+        $newCoupons = Db::name('coupon')
+            ->where('is_new', 1)
+            ->where('state', 1) // 状态正常
+            ->select();
+
+        if (empty($newCoupons)) {
+            return;
+        }
+
+        $currentTime = time();
+        $userCouponData = [];
+
+        foreach ($newCoupons as $coupon) {
+            // 计算优惠券的有效期
+            if ($coupon['expir_type'] == 1) {
+                // 按天数计算
+                $startTime = $currentTime;
+                $endTime = $currentTime + ($coupon['expir_day'] * 24 * 3600);
+            } else {
+                // 按时间段计算
+                $startTime = $coupon['start_time'];
+                $endTime = $coupon['end_time'];
+            }
+
+            // 确保结束时间大于当前时间
+            if ($endTime <= $currentTime) {
+                continue;
+            }
+
+            $userCouponData[] = [
+                'fb_id' => $fbId,
+                'uid' => $userId,
+                'cid' => $coupon['id'],
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'use_time' => 0,
+                'update_time' => $currentTime,
+                'create_time' => $currentTime,
+            ];
+        }
+
+        // 批量插入用户优惠券
+        if (!empty($userCouponData)) {
+            Db::name('user_coupon')->insertAll($userCouponData);
         }
     }
 
