@@ -11,7 +11,7 @@ class ConfigModel extends Model
 
     public static $strId = [1, 2];
     public static $langId = [6, 7, 8, 9, 10];
-    public static $imageId = [6,9];
+    public static $imageId = [6, 9];
     public static $init = [
         ['id' => 1, 'title' => '货币符号', 'value' => ''],
         ['id' => 2, 'title' => '货币代码', 'value' => ''],
@@ -30,13 +30,15 @@ class ConfigModel extends Model
         $res = [];
         foreach ($config as $value) {
             $res[$value['id']] = $value['value'];
-//            if ($id == 4 && $uid) {
-//                $config = Db::table('user')->where('id', $uid)->value('re_service_address');
-//                if ($config) {
-//                    $res[$id] = $config;
-//                    continue;
-//                }
-//            }
+            if ($value['id'] == 4 && $uid) {
+                $config = Db::table('user')->where('id', $uid)->value('service_address');
+                if ($config) {
+                    $res[$value['id']] = [
+                        ['label' => 'czkefu1', 'link' => $config, 'type' => '跳转app']
+                    ];
+                    continue;
+                }
+            }
             if (in_array($value['id'], self::$strId)) {
                 $res[$value['id']] = $value['value'];
                 continue;

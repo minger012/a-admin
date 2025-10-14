@@ -101,18 +101,19 @@ class User extends Base
 
     public function edit()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new UserValidate();
-        if (!$validate->append('id', 'require|number')->check($params)) {
-            return apiError($validate->getError());
-        }
-        $where = [['id', '=', $params['id']]];
-        if (!$this->isSuperAdmin()) {
-            $where[] = ['admin_id', '=', $this->adminInfo['id']];
-        }
-        unset($params['password']);
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new UserValidate();
+            if (!$validate->append('id', 'require|number')->check($params)) {
+                return apiError($validate->getError());
+            }
+            $where = [['id', '=', $params['id']]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            unset($params['password']);
+            unset($params['operate']);
             $res = Db::name('user')->where(['id' => $params['id']])->find();
             if (!$res) {
                 return apiError('non_existent');
