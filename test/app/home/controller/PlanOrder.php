@@ -15,23 +15,23 @@ class PlanOrder extends Base
 
     public function list()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new CommonValidate();
-        if (!$validate->check($params, $validate->page_rule)) {
-            return apiError($validate->getError());
-        }
-        $where = [['a.uid', '=', $this->userInfo['id']]];
-        if (in_array($params['type'], [1, 2, 3, 4])) {
-            $where[] = ['a.state', '=', $params['type'] - 1];
-        } elseif ($params['type'] == 5) {
-            $where[] = ['a.state', 'in', '4,5'];
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new CommonValidate();
+            if (!$validate->check($params, $validate->page_rule)) {
+                return apiError($validate->getError());
+            }
+            $where = [['a.uid', '=', $this->userInfo['id']]];
+            if (in_array($params['type'], [1, 2, 3, 4])) {
+                $where[] = ['a.state', '=', $params['type'] - 1];
+            } elseif ($params['type'] == 5) {
+                $where[] = ['a.state', 'in', '4,5'];
+            }
             $paginator = Db::table('plan_order')
                 ->alias('a')
-                ->join('plan b', 'a.plan_id = b.id')
-                ->join('goods c', 'a.goods_id = c.id')
+                ->leftJoin('plan b', 'a.plan_id = b.id')
+                ->leftJoin('goods c', 'a.goods_id = c.id')
                 ->where($where)
                 ->field('a.*,b.image,c.logo as goods_logo,c.type_name,c.intro as goods_intro')
                 ->order('a.id', 'desc')// 按ID倒序（可选）
@@ -308,17 +308,17 @@ class PlanOrder extends Base
     // 详情
     public function detail()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new CommonValidate();
-        if (!$validate->check($params, $validate->id_rule)) {
-            return apiError($validate->getError());
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new CommonValidate();
+            if (!$validate->check($params, $validate->id_rule)) {
+                return apiError($validate->getError());
+            }
             $planOrderDetail = Db::table('plan_order')
                 ->alias('a')
-                ->join('plan b', 'a.plan_id = b.id')
-                ->join('goods c', 'a.goods_id = b.id')
+                ->leftJoin('plan b', 'a.plan_id = b.id')
+                ->leftJoin('goods c', 'a.goods_id = c.id')
                 ->where('a.id', $params['id'])
                 ->where('a.uid', $this->userInfo['id'])
                 ->field('a.*,b.image,b.intro,b.content,b.orienteering,b.rule,c.logo as goods_logo,c.type_name,c.company as goods_company')
