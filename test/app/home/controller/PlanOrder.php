@@ -41,8 +41,8 @@ class PlanOrder extends Base
                 ]);
             $list = $paginator->items();
             foreach ($list as $key => $value) {
-                $list[$key]['image'] = getDomain() . $value['image'];
-                $list[$key]['goods_logo'] = getDomain() . $value['goods_logo'];
+                $list[$key]['image'] = fileDomain($value['image']);
+                $list[$key]['goods_logo'] = fileDomain($value['goods_logo']);
             }
             $res = [
                 'list' => $list,       // 当前页数据
@@ -326,8 +326,8 @@ class PlanOrder extends Base
             if (empty($planOrderDetail)) {
                 return apiError('non_existent');
             }
-            $planOrderDetail['image'] = getDomain() . $planOrderDetail['image'];
-            $planOrderDetail['goods_logo'] = getDomain() . $planOrderDetail['goods_logo'];
+            $planOrderDetail['image'] = fileDomain($planOrderDetail['image']);
+            $planOrderDetail['goods_logo'] = fileDomain($planOrderDetail['goods_logo']);
             foreach ($this->jsonField as $field) {
                 $planOrderDetail[$field] = jsonDecode($planOrderDetail[$field]);
             }
