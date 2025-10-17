@@ -136,7 +136,6 @@ class Withdraw extends Base
                 // 扣除冻结资金返回余额 跟 额度
                 Db::table('user')->where('id', $withdrawInfo['uid'])
                     ->dec('freeze_money', $withdrawInfo['money'])
-                    ->inc('withdraw_limit', $withdrawInfo['money'])
                     ->inc('money', $withdrawInfo['money'])
                     ->update();
                 // 插入流水

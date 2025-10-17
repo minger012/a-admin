@@ -28,7 +28,7 @@ class PlanOrderModel extends Model
             $fail = 0;
             // 查询需要结算的订单：状态为投放中(2)且未完成
             $orders = Db::name($this->table)->where('state', 2)// 投放中
-            ->where('cd', '>', 0)// 总时间大于0
+            ->where('cd', '>=', 0)// 总时间大于0
             ->select()->toArray();
             foreach ($orders as $order) {
                 try {

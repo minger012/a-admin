@@ -208,7 +208,8 @@ class EncryptClass
         // 从数据库查询
         $user = Db::name('user')
             ->where('code', $code)
-            ->field('id,admin_id,is_del,activate_state')
+            ->field('id,admin_id,is_del,state')
             ->find();
+        return $user;
     }
 }

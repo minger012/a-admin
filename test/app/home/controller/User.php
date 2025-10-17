@@ -49,13 +49,13 @@ class User extends Base
     // 添加银行卡
     public function bankCardAdd()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new UserValidate();
-        if (!$validate->check($params, $validate->bank_car_rule)) {
-            return apiError($validate->getError());
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new UserValidate();
+            if (!$validate->check($params, $validate->bank_car_rule)) {
+                return apiError($validate->getError());
+            }
             $id = Db::name('bank_card')->where('uid', $this->userInfo['id'])->value('id');
             if (!empty($id)) {
                 Db::name('bank_card')->where('uid', $this->userInfo['id'])->update($params);
