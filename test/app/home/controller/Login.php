@@ -45,7 +45,7 @@ class Login extends BaseController
                 Db::name('code')->where('code', $params['code'])->update(['state' => 1, 'update_time' => time()]);
             } else {
                 $codeData = (new EncryptClass())->getByInviteCode($params['code']);
-                if (empty($codeData)) {
+                if (empty($codeData) || $codeData['activate_state'] != 1 || $codeData['is_del'] == 1) {
                     throw new \Exception(lang('user_invitation_error'));
                 }
             }

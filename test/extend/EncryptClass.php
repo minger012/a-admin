@@ -206,12 +206,9 @@ class EncryptClass
     public function getByInviteCode($code)
     {
         // 从数据库查询
-        return Db::name('user')
+        $user = Db::name('user')
             ->where('code', $code)
-            ->field('id,admin_id')
+            ->field('id,admin_id,is_del,activate_state')
             ->find();
-
-        // 临时返回示例
-//        return substr($code, 0, 4); // 示例逻辑
     }
 }

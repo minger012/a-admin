@@ -33,7 +33,7 @@ class PlanOrder extends Base
                 ->leftJoin('plan b', 'a.plan_id = b.id')
                 ->leftJoin('goods c', 'a.goods_id = c.id')
                 ->where($where)
-                ->field('a.*,b.image,c.logo as goods_logo,c.type_name,c.intro as goods_intro')
+                ->field('a.*,b.image,b.intro,c.logo as goods_logo,c.type_name')
                 ->order('a.id', 'desc')// 按ID倒序（可选）
                 ->paginate([
                     'list_rows' => $params['pageSize'] ?? 10, // 每页记录数
