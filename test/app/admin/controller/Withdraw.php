@@ -95,15 +95,15 @@ class Withdraw extends Base
     // 审核
     public function audit()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new CommonValidate();
-        if (!$validate->check($params, $validate->id_rule)
-            || !$validate->check($params, $validate->withdraw_state)
-        ) {
-            return apiError($validate->getError());
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new CommonValidate();
+            if (!$validate->check($params, $validate->id_rule)
+                || !$validate->check($params, $validate->withdraw_state)
+            ) {
+                return apiError($validate->getError());
+            }
             // 开始事务
             Db::startTrans();
             $where = [['w.id', '=', $params['id']]];
@@ -141,6 +141,7 @@ class Withdraw extends Base
                 // 插入流水
                 Db::table('flow')->insert([
                     'uid' => $userInfo['id'],
+                    'admin_id' => $userInfo['admin_id'],
                     'type' => FlowModel::type_7,
                     'before' => $userInfo['money'],
                     'after' => $userInfo['money'] + $withdrawInfo['money'],
