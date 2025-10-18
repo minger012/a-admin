@@ -33,7 +33,7 @@ class UserModel extends Model
         try {
             // 获取用户数据
             $user = $this->where(['username' => $username])->find();
-            if (!empty($user) && $user['state'] == self::STATE_2) {
+            if (empty($user)) {
                 throw new \Exception(lang('login_null'));
             }
             // 验证用户密码

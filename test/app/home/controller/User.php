@@ -17,7 +17,7 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('money')
+                ->field('money,service_address,re_service_address')
                 ->find()->toArray();
             return apiSuccess('success', $uif);
         } catch (\Exception $e) {
@@ -440,7 +440,7 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('money,service_address')
+                ->field('money,re_service_address')
                 ->find()->toArray();
 
             $wait_putIn = Db::table('plan_order')
@@ -460,7 +460,7 @@ class User extends Base
                 'money' => $uif['money'],
                 'wait_putIn' => $wait_putIn,
                 'wait_money' => $wait_money,
-                'service_address' => $uif['service_address'],
+                'service_address' => $uif['re_service_address'],
             ]);
         } catch (\Exception $e) {
             return apiError($e->getMessage());
