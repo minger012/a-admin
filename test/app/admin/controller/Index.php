@@ -25,6 +25,21 @@ class Index extends Base
         }
     }
 
+    // 充值数量
+    public function orderCount()
+    {
+        try {
+            $where = [['state', '=', 1], ['money', '>', 0]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            $count = Db::table('order')->where($where)->count();
+            return apiSuccess('success', ['count' => $count]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
     /**
      * 获取授权码使用统计数据
      */
@@ -157,7 +172,7 @@ class Index extends Base
 
 //            // 如果是明细视图，添加分页信息
 //            if ($viewType === 'detail') {
-                $responseData['pagination'] = $detailPagination;
+            $responseData['pagination'] = $detailPagination;
 //            }
 
             return json([

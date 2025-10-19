@@ -167,19 +167,4 @@ class Withdraw extends Base
             return apiError($e->getMessage());
         }
     }
-
-    // 待审核数量
-    public function withdrawCount()
-    {
-        try {
-            $where = [['state', '=', 0]];
-            if (!$this->isSuperAdmin()) {
-                $where[] = ['admin_id', '=', $this->adminInfo['id']];
-            }
-            $count = Db::table('withdraw')->where($where)->count();
-            return apiSuccess('success', ['count' => $count]);
-        } catch (\Exception $e) {
-            return apiError($e->getMessage());
-        }
-    }
 }
