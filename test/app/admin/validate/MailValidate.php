@@ -27,4 +27,9 @@ class MailValidate extends Validate
         'content' => 'require|chsDash',
         'uids' => 'array',
     ];
+
+    public $rule_edit = [
+        'title' => 'require|chsDash',
+        'content' => 'require|chsDash',
+    ];
 }
