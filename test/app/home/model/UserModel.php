@@ -33,7 +33,7 @@ class UserModel extends Model
         try {
             // 获取用户数据
             $user = $this->where(['username' => $username])->find();
-            if (empty($user)) {
+            if (empty($user) || $user['is_del'] == 1) {
                 throw new \Exception(lang('login_null'));
             }
             // 验证用户密码
