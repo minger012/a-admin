@@ -42,7 +42,7 @@ class UserValidate extends Validate
         'currency' => 'require|alphaNum',
     ];
     public $bank_car_edit_rule = [
-        'cardno' => 'require|alphaNum|unique:bank_card,cardno^uid',
+        'cardno' => 'require|unique:bank_card,cardno^uid',
         'password' => 'length:6,32',
         'name' => 'require|regex:/^[\w\x{4e00}-\x{9fa5}\s]+$/u',
         'bank' => 'require|regex:/^[\w\x{4e00}-\x{9fa5}\s()]+$/u',

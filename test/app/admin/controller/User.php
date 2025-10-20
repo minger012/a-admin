@@ -101,18 +101,19 @@ class User extends Base
 
     public function edit()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new UserValidate();
-        if (!$validate->append('id', 'require|number')->check($params)) {
-            return apiError($validate->getError());
-        }
-        $where = [['id', '=', $params['id']]];
-        if (!$this->isSuperAdmin()) {
-            $where[] = ['admin_id', '=', $this->adminInfo['id']];
-        }
-        unset($params['password']);
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new UserValidate();
+            if (!$validate->append('id', 'require|number')->check($params)) {
+                return apiError($validate->getError());
+            }
+            $where = [['id', '=', $params['id']]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            unset($params['password']);
+            unset($params['operate']);
             $res = Db::name('user')->where(['id' => $params['id']])->find();
             if (!$res) {
                 return apiError('non_existent');
@@ -306,19 +307,19 @@ class User extends Base
     // 充值
     public function recharge()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        if (empty($params['id']) ||
-            floatval($params['money']) <= 0 ||
-            !in_array($params['type'], [OrderModel::TYPE_1, OrderModel::TYPE_3])
-        ) {
-            return apiError('params_error');
-        }
-        $where = [['id', '=', $params['id']]];
-        if (!$this->isSuperAdmin()) {
-            $where[] = ['admin_id', '=', $this->adminInfo['id']];
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            if (empty($params['id']) ||
+                floatval($params['money']) <= 0 ||
+                !in_array($params['type'], [OrderModel::TYPE_1, OrderModel::TYPE_3])
+            ) {
+                return apiError('params_error');
+            }
+            $where = [['id', '=', $params['id']]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
             // 开始事务
             Db::startTrans();
             //判断余额
@@ -346,7 +347,9 @@ class User extends Base
             Db::table('user')
                 ->where('id', $userInfo['id'])
                 ->inc('money', $params['money'])
+                ->inc('pay_money', $params['money'])
                 ->update();
+            (new UserModel())->updateStar($userInfo['id']);
             //添加流水
             Db::table('flow')->insert([
                 'fb_id' => $this->fb_id,

@@ -19,12 +19,12 @@ class Goods extends Base
             $goodsData = Db::table('goods')
                 ->where('id', $params['id'])
                 ->find();
-            $goodsData['logo'] = getDomain() . $goodsData['logo'];
+            $goodsData['logo'] = fileDomain($goodsData['logo']);
             $goodsData['image'] = jsonDecode($goodsData['image']);
             $goodsData['app_info'] = jsonDecode($goodsData['app_info']);
             if (!empty($goodsData['image']) && is_array($goodsData['image'])) {
                 foreach ($goodsData['image'] as $k => $v) {
-                    $goodsData['image'][$k] = getDomain() . $v;
+                    $goodsData['image'][$k] = fileDomain($v);
                 }
             }
             return apiSuccess('success', $goodsData);

@@ -2,6 +2,7 @@
 
 namespace app\home\model;
 
+use app\common\model\ConfigModel;
 use EncryptClass;
 use think\facade\Cache;
 use think\facade\Db;
@@ -32,7 +33,7 @@ class UserModel extends Model
         try {
             // 获取用户数据
             $user = $this->where(['username' => $username])->find();
-            if (!empty($user) && $user['state'] == self::STATE_2) {
+            if (empty($user) || $user['is_del'] == 1) {
                 throw new \Exception(lang('login_null'));
             }
             // 验证用户密码
@@ -143,5 +144,46 @@ class UserModel extends Model
             return $user; // 如果没有上级或pid为0，返回自己
         }
         return self::getPid($user['pid']); // 递归查找
+    }
+
+    // 更新星级
+    public function updateStar($uid)
+    {
+        $config = (new ConfigModel())->getConfigValue('5')[5];
+        if (empty($config) || !is_array($config)) {
+            return;
+        }
+
+        // 获取用户信息
+        $user = Db::table('user')->where('id', $uid)->field('id, pay_money, lv')->find();
+        if (!$user) {
+            return;
+        }
+
+        $payMoney = $user['pay_money']; // 用户充值金额
+        $currentLv = $user['lv']; // 当前星级
+        $newLv = 0; // 新星级，默认为0
+
+        // 按充值金额从大到小排序配置，确保匹配最高符合条件的星级
+
+        usort($config, function ($a, $b) {
+            return $b['recharge_amount'] <=> $a['recharge_amount'];
+        });
+
+        // 遍历配置，确定用户应得的星级
+        foreach ($config as $value) {
+            if ($payMoney >= $value['recharge_amount']) {
+                $newLv = $value['value'];
+                break;
+            }
+        }
+        // 如果星级有变化，则更新
+        if ($newLv != $currentLv) {
+            Db::table('user')
+                ->where('id', $uid)
+                ->update([
+                    'lv' => $newLv
+                ]);
+        }
     }
 }

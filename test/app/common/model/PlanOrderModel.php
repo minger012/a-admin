@@ -28,12 +28,12 @@ class PlanOrderModel extends Model
             $fail = 0;
             // 查询需要结算的订单：状态为投放中(2)且未完成
             $orders = Db::name($this->table)->where('state', 2)// 投放中
-            ->where('cd', '>', 0)// 总时间大于0
+            ->where('cd', '>=', 0)// 总时间大于0
             ->select()->toArray();
             foreach ($orders as $order) {
                 try {
-                $this->settleSingleOrder($order, $currentTime);
-                $success++;
+                    $this->settleSingleOrder($order, $currentTime);
+                    $success++;
                 } catch (\Exception $e) {
                     // 记录错误日志
                     echo "订单结算失败 ID:{$order['id']} - " . $e->getMessage() . "\n";
@@ -83,6 +83,8 @@ class PlanOrderModel extends Model
         if ($schedule >= 100) {
             $updateData['state'] = 4;
             $updateData['schedule'] = 100; // 确保进度为100%
+            $updateData['click_rate'] = max(100, $order['click_num'] / $order['show_num'] * 100);
+            $updateData['click_money'] = round($order['click_num'] * $order['click_price'], 2);
         }
         // 更新数据库
         $this->where('id', $order['id'])->update($updateData);

@@ -95,15 +95,15 @@ class Withdraw extends Base
     // 审核
     public function audit()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new CommonValidate();
-        if (!$validate->check($params, $validate->id_rule)
-            || !$validate->check($params, $validate->withdraw_state)
-        ) {
-            return apiError($validate->getError());
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new CommonValidate();
+            if (!$validate->check($params, $validate->id_rule)
+                || !$validate->check($params, $validate->withdraw_state)
+            ) {
+                return apiError($validate->getError());
+            }
             // 开始事务
             Db::startTrans();
             $where = [['w.id', '=', $params['id']]];
@@ -136,12 +136,12 @@ class Withdraw extends Base
                 // 扣除冻结资金返回余额 跟 额度
                 Db::table('user')->where('id', $withdrawInfo['uid'])
                     ->dec('freeze_money', $withdrawInfo['money'])
-                    ->inc('withdraw_limit', $withdrawInfo['money'])
                     ->inc('money', $withdrawInfo['money'])
                     ->update();
                 // 插入流水
                 Db::table('flow')->insert([
                     'uid' => $userInfo['id'],
+                    'admin_id' => $userInfo['admin_id'],
                     'type' => FlowModel::type_7,
                     'before' => $userInfo['money'],
                     'after' => $userInfo['money'] + $withdrawInfo['money'],
@@ -164,21 +164,6 @@ class Withdraw extends Base
         } catch (\Exception $e) {
             // 回滚事务
             Db::rollback();
-            return apiError($e->getMessage());
-        }
-    }
-
-    // 待审核数量
-    public function withdrawCount()
-    {
-        try {
-            $where = [['state', '=', 0]];
-            if (!$this->isSuperAdmin()) {
-                $where[] = ['admin_id', '=', $this->adminInfo['id']];
-            }
-            $count = Db::table('withdraw')->where($where)->count();
-            return apiSuccess('success', ['count' => $count]);
-        } catch (\Exception $e) {
             return apiError($e->getMessage());
         }
     }

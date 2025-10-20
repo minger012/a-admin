@@ -52,11 +52,10 @@ class Index extends Base
             }
             $userData = Db::table('user')
                 ->where('id', $this->userInfo['id'])
-                ->field('username,score,lv,sign,sign_time,image')
+                ->field('username,score,lv,sign,sign_time,image,code')
                 ->find();
             $userData['isSign'] = isToday($userData['sign_time']) ? 1 : 0;
             $userData['image'] = fileDomain($userData['image']);
-            $userData['code'] = (new EncryptClass())->generateInviteCode();
             return apiSuccess('success', [
                 'userData' => $userData,
                 'planOrderData' => [

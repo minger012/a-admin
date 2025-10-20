@@ -103,4 +103,41 @@ class Mail extends Base
             return apiError($e->getMessage());
         }
     }
+
+    public function edit()
+    {
+        try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new MailValidate();
+            if (!$validate->append('id', 'require|number')->check($params, $validate->rule_edit)) {
+                return apiError($validate->getError());
+            }
+            $params['update_time'] = time();
+            Db::name('user_mail')
+                ->where(['id' => $params['id']])
+                ->update($params);
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    public function del()
+    {
+        try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            if (!(int)$params['id']) {
+                return apiError('params_error');
+            }
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            Db::name('user_mail')->where(['id' => $params['id']])->delete();
+            return apiSuccess();
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
 }

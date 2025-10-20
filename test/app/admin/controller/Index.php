@@ -9,6 +9,37 @@ use think\facade\Request;
 
 class Index extends Base
 {
+
+    // 待审核数量
+    public function withdrawCount()
+    {
+        try {
+            $where = [['state', '=', 0]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            $count = Db::table('withdraw')->where($where)->count();
+            return apiSuccess('success', ['count' => $count]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
+    // 充值数量
+    public function orderCount()
+    {
+        try {
+            $where = [['state', '=', 1], ['money', '>', 0]];
+            if (!$this->isSuperAdmin()) {
+                $where[] = ['admin_id', '=', $this->adminInfo['id']];
+            }
+            $count = Db::table('order')->where($where)->count();
+            return apiSuccess('success', ['count' => $count]);
+        } catch (\Exception $e) {
+            return apiError($e->getMessage());
+        }
+    }
+
     /**
      * 获取授权码使用统计数据
      */
@@ -141,7 +172,7 @@ class Index extends Base
 
 //            // 如果是明细视图，添加分页信息
 //            if ($viewType === 'detail') {
-                $responseData['pagination'] = $detailPagination;
+            $responseData['pagination'] = $detailPagination;
 //            }
 
             return json([
@@ -532,10 +563,11 @@ class Index extends Base
 
             // 构建查询条件
             $where = [
-                ['state', '=', 1], // 只统计审核通过的提现
                 ['update_time', 'between', [$startTime, $endTime]]
             ];
-
+            if (isset($params['status']) && $params['status'] != '') {
+                $where[] = ['state', '=', $params['status']];
+            }
             // 权限判断
             if (!$this->isSuperAdmin()) {
                 $where[] = ['admin_id', '=', $this->adminInfo['id']];
@@ -567,9 +599,7 @@ class Index extends Base
                     COUNT(*) as withdraw_count,
                     SUM(money) as withdraw_amount
                 ")
-                ->where([
-                    ['update_time', 'between', [$startTime, $endTime]]
-                ])
+                ->where($where)
                 ->group('state')
                 ->select()
                 ->toArray();
@@ -694,9 +724,12 @@ class Index extends Base
 
             // 构建查询条件
             $where = [
-                ['state', '=', 1], // 只统计审核通过的提现
                 ['update_time', 'between', [$startTime, $endTime]]
             ];
+
+            if (isset($params['status']) && $params['status'] != '') {
+                $where[] = ['state', '=', $params['status']];
+            }
 
             // 权限判断
             if (!$this->isSuperAdmin()) {
@@ -707,7 +740,6 @@ class Index extends Base
                     $where[] = ['admin_id', '=', $admin_id];
                 }
             }
-
             $detailQuery = Db::table('withdraw')
                 ->field("
                     id,

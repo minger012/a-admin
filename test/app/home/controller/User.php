@@ -17,7 +17,7 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('money')
+                ->field('money,service_address,re_service_address')
                 ->find()->toArray();
             return apiSuccess('success', $uif);
         } catch (\Exception $e) {
@@ -49,13 +49,13 @@ class User extends Base
     // 添加银行卡
     public function bankCardAdd()
     {
-        $input = request()->getContent();
-        $params = json_decode($input, true);
-        $validate = new UserValidate();
-        if (!$validate->check($params, $validate->bank_car_rule)) {
-            return apiError($validate->getError());
-        }
         try {
+            $input = request()->getContent();
+            $params = json_decode($input, true);
+            $validate = new UserValidate();
+            if (!$validate->check($params, $validate->bank_car_rule)) {
+                return apiError($validate->getError());
+            }
             $id = Db::name('bank_card')->where('uid', $this->userInfo['id'])->value('id');
             if (!empty($id)) {
                 Db::name('bank_card')->where('uid', $this->userInfo['id'])->update($params);
@@ -135,7 +135,7 @@ class User extends Base
         try {
             // 开始事务
             Db::startTrans();
-            $cardInfo = Db::name('bank_card')->where('id', $this->userInfo['id'])->find();
+            $cardInfo = Db::name('bank_card')->where('uid', $this->userInfo['id'])->find();
             if (empty($cardInfo)) {
                 throw new \Exception(lang('bank_error'));
             }
@@ -201,11 +201,11 @@ class User extends Base
         }
         try {
             $where = [['uid', '=', $this->userInfo['id']]];
-            if (isset($params['type']) && $params['type'] == 1) {
-                $where[] = ['type', 'in', '1,7']; //只显示充值，赠送
-            } else {
-                $where[] = ['type', 'in', '2,3'];
-            }
+//            if (isset($params['type']) && $params['type'] == 1) {
+//                $where[] = ['type', 'in', '1,7']; //只显示充值，赠送
+//            } else {
+//                $where[] = ['type', 'in', '2,3'];
+//            }
             if (!empty($params['sTime'])) {
                 $where[] = ['create_time', '>=', $params['sTime']];
             }
@@ -219,9 +219,9 @@ class User extends Base
                     'list_rows' => $params['pageSize'] ?? 100, // 每页记录数
                     'page' => $params['page'] ?? 1,     // 当前页码
                 ]);
-            $total_money = Db::name('flow')
-                ->where($where)
-                ->value('SUM(cha) as total_money');
+//            $total_money = Db::name('flow')
+//                ->where($where)
+//                ->value('SUM(cha) as total_money');
 
             $res = [
                 'list' => $paginator->items(),       // 当前页数据
@@ -229,7 +229,7 @@ class User extends Base
                 'page' => $paginator->currentPage(), // 当前页码
                 'page_size' => $paginator->listRows(),    // 每页记录数
                 'total_page' => $paginator->lastPage(),    // 总页数
-                'total_money' => $total_money ?? 0,
+//                'total_money' => $total_money ?? 0,
             ];
             return apiSuccess('success', $res);
         } catch (\Exception $e) {
@@ -440,7 +440,7 @@ class User extends Base
     {
         try {
             $uif = $model::where(['id' => $this->userInfo['id']])
-                ->field('money')
+                ->field('money,re_service_address')
                 ->find()->toArray();
 
             $wait_putIn = Db::table('plan_order')
@@ -460,7 +460,7 @@ class User extends Base
                 'money' => $uif['money'],
                 'wait_putIn' => $wait_putIn,
                 'wait_money' => $wait_money,
-
+                'service_address' => $uif['re_service_address'],
             ]);
         } catch (\Exception $e) {
             return apiError($e->getMessage());
