@@ -1,1 +1,0 @@
-import{A as e}from"./index--W9FB2Si.js";function a(t){return e.Post("/admin/withdraw/list",t,{meta:{isReturnNativeResponse:!0}})}function n(t){return e.Post("/admin/withdraw/audit",t,{meta:{isReturnNativeResponse:!0}})}function r(){return e.Post("/admin/index/withdrawCount",{},{meta:{isReturnNativeResponse:!0}})}export{r as a,a as g,n as w};
