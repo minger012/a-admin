@@ -56,8 +56,9 @@ class Flow extends Base
             $query = Db::table('flow')
                 ->alias('a')
                 ->join('user b', 'a.uid = b.id')
+                ->join('admin c', 'a.admin_id = c.id')
                 ->where($where)
-                ->field('a.*, b.username');
+                ->field('a.*, b.username,c.username as admin_username');
             $paginator = $query->order('a.id', 'desc')// 按ID倒序（可选）
             ->paginate([
                 'list_rows' => $params['pageSize'] ?? 10, // 每页记录数

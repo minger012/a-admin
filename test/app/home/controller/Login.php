@@ -70,6 +70,7 @@ class Login extends BaseController
                 'phone' => $params['mobile'],
                 'fb_id' => $fbId,
                 'score' => 100,
+                'state' => 0,
                 'image' => '/static/image/head' . rand(1, 7) . '.jpeg',
             ]);
 
