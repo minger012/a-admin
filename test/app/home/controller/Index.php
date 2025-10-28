@@ -59,6 +59,7 @@ class Index extends Base
             return apiSuccess('success', [
                 'userData' => $userData,
                 'planOrderData' => [
+                    'allCount' => 53460 + Db::table('plan_order')->count(),
                     'money' => round($money, 2),
                     'count' => count($planOrderData),
                     'putIn' => round($putIn, 2),
