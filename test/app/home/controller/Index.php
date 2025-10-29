@@ -3,6 +3,7 @@
 namespace app\home\controller;
 
 use app\common\model\ConfigModel;
+use app\common\service\OnlineUserService;
 use app\common\validate\CommonValidate;
 use EncryptClass;
 use think\facade\Db;
@@ -56,10 +57,45 @@ class Index extends Base
                 ->find();
             $userData['isSign'] = isToday($userData['sign_time']) ? 1 : 0;
             $userData['image'] = fileDomain($userData['image']);
+            $withdraw = Db::table('withdraw')
+                ->alias('a')
+                ->join('user b', 'a.uid=b.id')
+                ->where('a.state', 1)
+                ->order('a.id desc')
+                ->limit(50)
+                ->field('a.money,b.username')
+                ->select()->toArray();
+            // 如果数据不足50条，补充假数据
+            $currentCount = count($withdraw);
+            if ($currentCount < 50) {
+                $fakeCount = 50 - $currentCount;
+                $fakeNames = [
+                    'James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph', 'Thomas', 'Charles',
+                    'Christopher', 'Daniel', 'Matthew', 'Anthony', 'Donald', 'Mark', 'Paul', 'Steven', 'Andrew', 'Kenneth',
+                    'Joshua', 'Kevin', 'Brian', 'George', 'Edward', 'Ronald', 'Timothy', 'Jason', 'Jeffrey', 'Ryan',
+                    'Jacob', 'Gary', 'Nicholas', 'Eric', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon',
+                    'Benjamin', 'Samuel', 'Gregory', 'Frank', 'Alexander', 'Raymond', 'Patrick', 'Jack', 'Dennis', 'Jerry',
+                    'Tyler', 'Aaron', 'Jose', 'Adam', 'Nathan', 'Henry', 'Zachary', 'Douglas', 'Peter', 'Kyle'
+                ];
+
+                for ($i = 0; $i < $fakeCount; $i++) {
+                    $randomName = $fakeNames[array_rand($fakeNames)] . ' ' . $fakeNames[array_rand($fakeNames)];
+                    $randomMoney = round(mt_rand(10, 500) + mt_rand(0, 99) / 100, 1);
+
+                    $withdraw[] = [
+                        'money' => $randomMoney,
+                        'username' => $randomName
+                    ];
+                }
+            }
+            $planOrderCount = Db::table('plan_order')->count();
             return apiSuccess('success', [
                 'userData' => $userData,
+                'onlineCount' => 80212 + OnlineUserService::count(),
+                'adCount' => 43988 + $planOrderCount,
+                'planOrderCount' => 53460 + $planOrderCount,
+                'withdrawList' => $withdraw,
                 'planOrderData' => [
-                    'allCount' => 53460 + Db::table('plan_order')->count(),
                     'money' => round($money, 2),
                     'count' => count($planOrderData),
                     'putIn' => round($putIn, 2),
